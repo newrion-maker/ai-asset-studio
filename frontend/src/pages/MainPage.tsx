@@ -45,30 +45,29 @@ export const MainPage = () => {
     <Layout>
       <div onDrop={upload.onDrop} onDragOver={upload.onDragOver}>
         <Header upload={upload} />
-        <main className="grid gap-3 px-3 py-3">
-          <div className="grid min-h-[520px] gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)]">
-            <CanvasStage onPlacementChange={setPlacement} />
-            <ResultPanel />
-          </div>
-
-          <section className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900 sm:flex-row sm:items-center">
-            <div className="flex-1 text-sm text-slate-500 dark:text-slate-400">
-              {canGenerate ? 'Ready to generate. Adjust settings below if needed.' : 'Upload an image and select an area to enable generation.'}
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="btn-secondary justify-center"
-                disabled={!canGenerate}
-                onClick={() => void cropOnly()}
-              >
-                Crop Only
-              </button>
-              <div className="min-w-[220px]">
-                <GenerateButton canGenerate={canGenerate} onGenerate={() => void generate()} />
+        <main className="mx-auto grid max-w-[1280px] gap-3 px-3 py-3">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)]">
+            <div className="grid min-h-[520px] gap-3">
+              <CanvasStage onPlacementChange={setPlacement} />
+              <div className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900">
+                <div className="flex-1 text-sm text-slate-500 dark:text-slate-400">
+                  {canGenerate ? 'Ready to generate. Adjust settings below if needed.' : 'Upload an image and select an area to enable generation.'}
+                </div>
+                <button
+                  type="button"
+                  className="btn-secondary justify-center"
+                  disabled={!canGenerate}
+                  onClick={() => void cropOnly()}
+                >
+                  Crop Only
+                </button>
+                <div className="min-w-[180px]">
+                  <GenerateButton canGenerate={canGenerate} onGenerate={() => void generate()} />
+                </div>
               </div>
             </div>
-          </section>
+            <ResultPanel />
+          </div>
 
           <section className="grid gap-3 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900 xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)_220px]">
             <PreviewPanel placement={placement} />
