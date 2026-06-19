@@ -45,7 +45,7 @@ export const MainPage = () => {
     <Layout>
       <div onDrop={upload.onDrop} onDragOver={upload.onDragOver}>
         <Header upload={upload} />
-        <main className="mx-auto grid max-w-[1280px] gap-3 px-3 py-3">
+        <main className="mx-auto grid max-w-[1640px] gap-3 px-3 py-3">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)]">
             <div className="grid min-h-[520px] gap-3">
               <CanvasStage onPlacementChange={setPlacement} />
