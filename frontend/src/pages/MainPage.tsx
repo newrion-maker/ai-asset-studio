@@ -51,6 +51,25 @@ export const MainPage = () => {
             <ResultPanel />
           </div>
 
+          <section className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900 sm:flex-row sm:items-center">
+            <div className="flex-1 text-sm text-slate-500 dark:text-slate-400">
+              {canGenerate ? 'Ready to generate. Adjust settings below if needed.' : 'Upload an image and select an area to enable generation.'}
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="btn-secondary justify-center"
+                disabled={!canGenerate}
+                onClick={() => void cropOnly()}
+              >
+                Crop Only
+              </button>
+              <div className="min-w-[220px]">
+                <GenerateButton canGenerate={canGenerate} onGenerate={() => void generate()} />
+              </div>
+            </div>
+          </section>
+
           <section className="grid gap-3 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900 xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)_220px]">
             <PreviewPanel placement={placement} />
             <OutputModeSelector />
@@ -58,20 +77,7 @@ export const MainPage = () => {
               <GenerationSettingsPanel />
               <PresetSelector />
             </div>
-            <div className="space-y-3">
-              <PromptPanel />
-              <div className="grid grid-cols-2 gap-2">
-                <GenerateButton canGenerate={canGenerate} onGenerate={() => void generate()} />
-                <button
-                  type="button"
-                  className="btn-secondary w-full justify-center"
-                  disabled={!canGenerate}
-                  onClick={() => void cropOnly()}
-                >
-                  Crop Only
-                </button>
-              </div>
-            </div>
+            <PromptPanel />
           </section>
         </main>
       </div>
