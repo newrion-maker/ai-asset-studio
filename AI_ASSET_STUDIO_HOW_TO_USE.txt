@@ -1,0 +1,17 @@
+AI Asset Studio easy start
+
+1. Double-click this file:
+   start-ai-asset-studio.bat
+
+2. Two black windows will open.
+   Keep them open while using the program.
+
+3. Your browser will open automatically.
+   If it does not, open this address:
+   http://127.0.0.1:5173
+
+4. When you are done, close the two black windows.
+
+Important:
+- Generate needs an OpenAI API key in backend\.env.
+- If you change backend\.env, close the backend window and start again.

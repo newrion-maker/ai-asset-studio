@@ -1,0 +1,43 @@
+import { useAppStore } from '../../store/appStore';
+import { useImageUpload } from '../../hooks/useImageUpload';
+
+interface HeaderProps {
+  upload: ReturnType<typeof useImageUpload>;
+}
+
+export const Header = ({ upload }: HeaderProps) => {
+  const toggleHistory = useAppStore((state) => state.toggleHistory);
+  const setSettingsOpen = useAppStore((state) => state.setSettingsOpen);
+  const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
+  const darkMode = useAppStore((state) => state.darkMode);
+
+  return (
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
+      <div>
+        <h1 className="text-xl font-semibold text-slate-950 dark:text-white">AI Asset Studio</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Select, regenerate, save, and export design assets.</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={upload.inputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={upload.onInputChange}
+        />
+        <button type="button" className="btn-secondary" onClick={toggleDarkMode}>
+          {darkMode ? 'Light' : 'Dark'}
+        </button>
+        <button type="button" className="btn-secondary" onClick={toggleHistory}>
+          History
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setSettingsOpen(true)}>
+          Settings
+        </button>
+        <button type="button" className="btn-primary" onClick={upload.openFileDialog}>
+          Upload
+        </button>
+      </div>
+    </header>
+  );
+};
