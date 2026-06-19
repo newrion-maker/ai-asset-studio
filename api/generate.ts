@@ -150,7 +150,8 @@ export default async function handler(
       prompt: buildPrompt(prompt, outputMode, selectedPreset, generationSettings),
       n: 1,
       size: chooseOpenAIImageSize(generationSettings),
-    } as Parameters<typeof openai.images.edit>[0]);
+      stream: false,
+    });
 
     const imageBase64 = response.data?.[0]?.b64_json;
     if (!imageBase64) {

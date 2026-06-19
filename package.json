@@ -9,7 +9,7 @@
     "typecheck": "npm run typecheck --prefix frontend && npm run typecheck --prefix backend"
   },
   "dependencies": {
-    "openai": "^4.47.1"
+    "openai": "^6.44.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
