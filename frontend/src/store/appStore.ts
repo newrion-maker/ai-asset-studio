@@ -68,7 +68,7 @@ const defaultEnhanceOptions: EnhanceOptions = {
 
 const defaultGenerationSettings: GenerationSettings = {
   aspectRatio: 'keep_selection',
-  sizePreset: 'standard',
+  sizePreset: 'preview',
   fitMode: 'auto',
 };
 
@@ -80,7 +80,7 @@ export const useAppStore = create<AppState>((set) => ({
   polygon: null,
   polygonClosed: false,
   prompt: '',
-  outputMode: 'transparent',
+  outputMode: 'keep_background',
   generationSettings: defaultGenerationSettings,
   selectedPreset: 'original',
   enhanceOptions: defaultEnhanceOptions,
