@@ -2,7 +2,7 @@ import OpenAI, { toFile } from 'openai';
 import { isAuthenticated } from './_auth';
 
 type OutputMode = 'keep_background' | 'transparent' | 'smart_auto';
-type PresetStyle = 'original' | 'flat' | 'clay' | '3d' | 'glass' | 'minimal' | 'gradient' | 'illustration' | 'isometric' | 'cartoon';
+type PresetStyle = 'original' | 'flat' | 'clay' | '3d' | 'glass' | 'minimal' | 'gradient' | 'illustration' | 'isometric' | 'cartoon' | 'pictogram';
 type ResultAspectRatio = 'keep_selection' | '1:1' | '4:3' | '16:9' | '2:1';
 
 interface GenerationSettings {
@@ -54,6 +54,8 @@ const presetPrompts: Record<PresetStyle, string> = {
     'Create an isometric asset. Use a consistent three-quarter isometric angle, clean geometric structure, balanced depth, soft shadows, and clear spatial organization.',
   cartoon:
     'Create a fun cartoon-style asset. Use bold clean outlines, bright cheerful colors, simple exaggerated shapes, smooth flat shading with soft highlights, and a playful friendly character look.',
+  pictogram:
+    'Create a simple pictogram-style icon. Use a single solid color silhouette, highly simplified universal symbol shapes, strong clear negative space, no gradients or fine detail, and a clean sign-system look.',
 };
 
 const commonQualityPrompt =

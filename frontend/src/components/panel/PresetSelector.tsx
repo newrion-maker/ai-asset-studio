@@ -12,6 +12,7 @@ const presets: Array<{ value: PresetStyle; label: string }> = [
   { value: 'illustration', label: 'Illustration' },
   { value: 'isometric', label: 'Isometric' },
   { value: 'cartoon', label: 'Cartoon' },
+  { value: 'pictogram', label: 'Pictogram' },
 ];
 
 export const PresetSelector = () => {
