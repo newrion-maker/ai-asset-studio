@@ -19,6 +19,7 @@ interface GenerateBody {
   outputMode?: OutputMode;
   selectedPreset?: PresetStyle;
   generationSettings?: GenerationSettings;
+  apiKey?: string;
 }
 
 const maskInstruction =
@@ -138,11 +139,6 @@ export default async function handler(
   }
 
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is required.');
-    }
-
     const body = readBody(req.body);
     const {
       croppedImageBase64,
@@ -151,7 +147,16 @@ export default async function handler(
       outputMode = 'smart_auto',
       selectedPreset = 'original',
       generationSettings = { aspectRatio: 'keep_selection', sizePreset: 'standard', fitMode: 'auto' },
+      apiKey: userApiKey,
     } = body;
+
+    // Each user supplies their own OpenAI key from the browser. It is used for
+    // this request only and never stored or logged.
+    const apiKey = userApiKey?.trim();
+    if (!apiKey) {
+      res.status(400).json({ error: 'no_api_key', message: 'An OpenAI API key is required.' });
+      return;
+    }
 
     if (!croppedImageBase64) {
       res.status(400).json({ error: 'no_selection', message: 'croppedImageBase64 is required.' });
@@ -189,10 +194,11 @@ export default async function handler(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    const isConfigError = message.includes('OPENAI_API_KEY');
-    res.status(isConfigError ? 500 : 502).json({
-      error: isConfigError ? 'config_error' : 'api_error',
-      message,
-    });
+    const status = (error as { status?: number })?.status;
+    if (status === 401 || /incorrect api key|invalid api key/i.test(message)) {
+      res.status(401).json({ error: 'invalid_api_key', message: 'The provided OpenAI API key is invalid.' });
+      return;
+    }
+    res.status(502).json({ error: 'api_error', message });
   }
 }

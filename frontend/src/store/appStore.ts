@@ -35,6 +35,7 @@ interface AppState {
   history: HistoryItem[];
   darkMode: boolean;
   language: Language;
+  apiKey: string;
   historyOpen: boolean;
   settingsOpen: boolean;
   setUploadedImage: (img: HTMLImageElement, dataUrl: string) => void;
@@ -54,6 +55,7 @@ interface AppState {
   saveAsset: (item: AssetItem) => void;
   deleteAsset: (id: string) => void;
   toggleFavorite: (id: string) => void;
+  setApiKey: (key: string) => void;
   toggleDarkMode: () => void;
   toggleLanguage: () => void;
   toggleHistory: () => void;
@@ -95,6 +97,7 @@ export const useAppStore = create<AppState>((set) => ({
   history: [],
   darkMode: window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false,
   language: (localStorage.getItem('language') as Language | null) ?? 'ko',
+  apiKey: localStorage.getItem('openai_api_key') ?? '',
   historyOpen: true,
   settingsOpen: false,
   setUploadedImage: (img, dataUrl) =>
@@ -146,6 +149,15 @@ export const useAppStore = create<AppState>((set) => ({
         item.id === id ? { ...item, favorite: !item.favorite } : item,
       ),
     })),
+  setApiKey: (key) => {
+    const apiKey = key.trim();
+    if (apiKey) {
+      localStorage.setItem('openai_api_key', apiKey);
+    } else {
+      localStorage.removeItem('openai_api_key');
+    }
+    set({ apiKey });
+  },
   toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
   toggleLanguage: () =>
     set((state) => {

@@ -28,6 +28,7 @@ interface GenerateAssetInput {
   prompt: string;
   generationSettings: GenerationSettings;
   transparent?: boolean;
+  apiKey: string;
 }
 
 const maskInstruction =
@@ -91,12 +92,8 @@ export const generateAsset = async ({
   prompt,
   generationSettings,
   transparent,
+  apiKey,
 }: GenerateAssetInput): Promise<GenerateAssetResult> => {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is required.');
-  }
-
   const openai = new OpenAI({ apiKey });
   const imageFile = await toFile(imageBuffer, 'crop.png', { type: 'image/png' });
   const maskFile = maskBuffer ? await toFile(maskBuffer, 'mask.png', { type: 'image/png' }) : undefined;

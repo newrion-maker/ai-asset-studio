@@ -46,6 +46,9 @@ export const apiGenerate = async (req: GenerateRequest): Promise<GenerateResult>
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+    if (errorBody?.error === 'no_api_key' || errorBody?.error === 'invalid_api_key') {
+      throw new Error(errorBody.error);
+    }
     throw new Error(errorBody?.message ?? errorBody?.error ?? `api_error:${response.status}`);
   }
 

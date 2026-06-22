@@ -69,6 +69,7 @@ export interface GenerateRequest {
   selectedPreset: PresetStyle;
   generationSettings: GenerationSettings;
   enhance?: EnhanceOptions;
+  apiKey?: string;
 }
 
 export interface GenerateResult {
@@ -99,6 +100,8 @@ export type ErrorType =
   | 'unsupported_file'
   | 'file_too_large'
   | 'no_selection'
+  | 'no_api_key'
+  | 'invalid_api_key'
   | 'config_error'
   | 'billing_limit'
   | 'api_error'

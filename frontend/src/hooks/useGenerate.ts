@@ -14,6 +14,7 @@ export const useGenerate = (placement: ImagePlacement | null) => {
   const outputMode = useAppStore((state) => state.outputMode);
   const generationSettings = useAppStore((state) => state.generationSettings);
   const selectedPreset = useAppStore((state) => state.selectedPreset);
+  const apiKey = useAppStore((state) => state.apiKey);
   const setGenerateResult = useAppStore((state) => state.setGenerateResult);
   const setLoadingState = useAppStore((state) => state.setLoadingState);
   const setError = useAppStore((state) => state.setError);
@@ -26,6 +27,10 @@ export const useGenerate = (placement: ImagePlacement | null) => {
   const generate = useCallback(async () => {
     if (!uploadedImageDataUrl || !selection || !placement) {
       setError('no_selection');
+      return;
+    }
+    if (!apiKey) {
+      setError('no_api_key');
       return;
     }
 
@@ -45,6 +50,7 @@ export const useGenerate = (placement: ImagePlacement | null) => {
         outputMode,
         selectedPreset,
         generationSettings: { ...generationSettings, selectionAspectRatio },
+        apiKey,
       });
       const processedResult = await postProcessGeneratedImage(
         result.resultImageBase64,
@@ -62,6 +68,10 @@ export const useGenerate = (placement: ImagePlacement | null) => {
         setError('timeout');
       } else if (message === 'network_error') {
         setError('network_error');
+      } else if (message === 'no_api_key') {
+        setError('no_api_key');
+      } else if (message === 'invalid_api_key' || message.toLowerCase().includes('incorrect api key') || message.toLowerCase().includes('invalid api key')) {
+        setError('invalid_api_key');
       } else if (message.includes('OPENAI_API_KEY') || message === 'config_error') {
         setError('config_error', message);
       } else if (message.toLowerCase().includes('billing hard limit') || message.toLowerCase().includes('billing')) {
@@ -72,6 +82,7 @@ export const useGenerate = (placement: ImagePlacement | null) => {
       setLoadingState('idle');
     }
   }, [
+    apiKey,
     generationSettings,
     outputMode,
     placement,

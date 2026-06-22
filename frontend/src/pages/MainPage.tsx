@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CanvasStage } from '../components/canvas/CanvasStage';
+import { ApiKeySettings } from '../components/common/ApiKeySettings';
 import { Modal } from '../components/common/Modal';
 import { Header } from '../components/layout/Header';
 import { Layout } from '../components/layout/Layout';
@@ -73,11 +74,7 @@ export const MainPage = () => {
       </div>
 
       <Modal title={t('settings.title')} open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-        <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-          <p>{t('settings.key')}</p>
-          <p>{t('settings.endpoint')}: {import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}</p>
-          <p>{t('settings.storage')}</p>
-        </div>
+        <ApiKeySettings />
       </Modal>
 
       <Modal title={t('error.title')} open={Boolean(error)} onClose={() => setError(null)}>

@@ -9,6 +9,7 @@ interface GenerateBody {
   outputMode?: OutputMode;
   selectedPreset?: PresetStyle;
   generationSettings?: GenerationSettings;
+  apiKey?: string;
 }
 
 export const generateRouter = Router();
@@ -22,7 +23,14 @@ generateRouter.post('/generate', async (req, res, next) => {
       outputMode = 'smart_auto',
       selectedPreset = 'original',
       generationSettings = { aspectRatio: 'keep_selection', sizePreset: 'standard', fitMode: 'auto' },
+      apiKey,
     } = req.body as GenerateBody;
+
+    const userApiKey = apiKey?.trim();
+    if (!userApiKey) {
+      res.status(400).json({ error: 'no_api_key', message: 'An OpenAI API key is required.' });
+      return;
+    }
 
     if (!croppedImageBase64) {
       res.status(400).json({ error: 'no_selection', message: 'croppedImageBase64 is required.' });
@@ -38,6 +46,7 @@ generateRouter.post('/generate', async (req, res, next) => {
       prompt: fullPrompt,
       generationSettings,
       transparent: outputMode === 'transparent',
+      apiKey: userApiKey,
     });
 
     res.json({
