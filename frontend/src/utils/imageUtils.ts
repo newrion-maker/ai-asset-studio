@@ -219,10 +219,9 @@ export const postProcessGeneratedImage = async (
     throw new Error('Canvas is not available.');
   }
 
-  const sourceAspectRatio = image.naturalWidth / image.naturalHeight;
-  const shouldContain =
-    settings.fitMode === 'contain' ||
-    (settings.fitMode === 'auto' && Math.abs(sourceAspectRatio - targetAspectRatio) > 0.25);
+  // Only "Pad" letterboxes. Auto and Crop both fill the frame with the image so
+  // there are no empty/white bars; aspect mismatch is absorbed by a slight crop.
+  const shouldContain = settings.fitMode === 'contain';
 
   if (shouldContain) {
     // Letterbox with white only for opaque output; keep the padding transparent
