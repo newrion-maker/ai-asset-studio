@@ -50,6 +50,7 @@ export const useGenerate = (placement: ImagePlacement | null) => {
         result.resultImageBase64,
         generationSettings,
         selectionAspectRatio,
+        outputMode === 'transparent',
       );
       const finalResult = { ...result, resultImageBase64: processedResult.base64 };
       setGenerateResult(finalResult);

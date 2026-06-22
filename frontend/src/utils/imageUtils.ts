@@ -206,6 +206,7 @@ export const postProcessGeneratedImage = async (
   base64: string,
   settings: GenerationSettings,
   selectionAspectRatio: number,
+  transparent = false,
 ): Promise<{ base64: string; resolution: string }> => {
   const image = await loadImage(base64);
   const targetAspectRatio = getAspectRatioValue(settings.aspectRatio, selectionAspectRatio);
@@ -224,8 +225,12 @@ export const postProcessGeneratedImage = async (
     (settings.fitMode === 'auto' && Math.abs(sourceAspectRatio - targetAspectRatio) > 0.25);
 
   if (shouldContain) {
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    // Letterbox with white only for opaque output; keep the padding transparent
+    // when the user asked for a transparent result.
+    if (!transparent) {
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
     const scale = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
     const width = image.naturalWidth * scale;
     const height = image.naturalHeight * scale;

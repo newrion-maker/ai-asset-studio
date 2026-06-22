@@ -160,6 +160,7 @@ export default async function handler(
       prompt: maskFile ? `${basePrompt} ${maskInstruction}` : basePrompt,
       n: 1,
       size: chooseOpenAIImageSize(generationSettings),
+      ...(outputMode === 'transparent' ? { background: 'transparent' } : {}),
       stream: false,
     });
 

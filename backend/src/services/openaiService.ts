@@ -25,6 +25,7 @@ interface GenerateAssetInput {
   maskBuffer?: Buffer;
   prompt: string;
   generationSettings: GenerationSettings;
+  transparent?: boolean;
 }
 
 const maskInstruction =
@@ -75,6 +76,7 @@ export const generateAsset = async ({
   maskBuffer,
   prompt,
   generationSettings,
+  transparent,
 }: GenerateAssetInput): Promise<GenerateAssetResult> => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -93,6 +95,7 @@ export const generateAsset = async ({
     prompt: maskFile ? `${aspectPrompt} ${maskInstruction}` : aspectPrompt,
     n: 1,
     size: chooseOpenAIImageSize(generationSettings),
+    ...(transparent ? { background: 'transparent' } : {}),
     stream: false,
   });
 

@@ -32,7 +32,13 @@ generateRouter.post('/generate', async (req, res, next) => {
     const fullPrompt = buildPrompt(prompt, outputMode, selectedPreset);
     const imageBuffer = Buffer.from(stripDataUrlPrefix(croppedImageBase64), 'base64');
     const maskBuffer = maskBase64 ? Buffer.from(stripDataUrlPrefix(maskBase64), 'base64') : undefined;
-    const result = await generateAsset({ imageBuffer, maskBuffer, prompt: fullPrompt, generationSettings });
+    const result = await generateAsset({
+      imageBuffer,
+      maskBuffer,
+      prompt: fullPrompt,
+      generationSettings,
+      transparent: outputMode === 'transparent',
+    });
 
     res.json({
       resultImageBase64: `data:image/png;base64,${result.imageBase64}`,
