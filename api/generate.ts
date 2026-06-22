@@ -104,9 +104,17 @@ const buildPrompt = (userPrompt: string, outputMode: OutputMode, selectedPreset:
         ? 'Fill the whole frame with the subject and composition.'
         : 'Use the most natural framing for the selected crop.';
 
+  const presetPrompt =
+    outputMode === 'transparent'
+      ? presetPrompts[selectedPreset].replace(
+          /Isolated on a neutral white background for a clean diorama effect\.?/i,
+          'Place the subject on a fully transparent background with no backdrop.',
+        )
+      : presetPrompts[selectedPreset];
+
   return [
     basePrompts[outputMode],
-    presetPrompts[selectedPreset],
+    presetPrompt,
     userPrompt.trim(),
     commonQualityPrompt,
     `Compose the result for a ${ratio} output. ${fit}`,

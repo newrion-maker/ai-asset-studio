@@ -74,8 +74,16 @@ const presetPrompts: Record<PresetStyle, string> = {
 const commonQualityPrompt =
   'Preserve the main subject and the full selected composition. Do not crop out important visible parts. Do not add random text, labels, logos, watermarks, extra people, unrelated objects, or UI elements. Keep the result clean, high quality, and suitable for web or app design.';
 
-export const buildPrompt = (userPrompt: string, outputMode: OutputMode, selectedPreset: PresetStyle): string =>
-  [basePrompts[outputMode], presetPrompts[selectedPreset], userPrompt.trim(), commonQualityPrompt].filter(Boolean).join(' ');
+export const buildPrompt = (userPrompt: string, outputMode: OutputMode, selectedPreset: PresetStyle): string => {
+  const presetPrompt =
+    outputMode === 'transparent'
+      ? presetPrompts[selectedPreset].replace(
+          /Isolated on a neutral white background for a clean diorama effect\.?/i,
+          'Place the subject on a fully transparent background with no backdrop.',
+        )
+      : presetPrompts[selectedPreset];
+  return [basePrompts[outputMode], presetPrompt, userPrompt.trim(), commonQualityPrompt].filter(Boolean).join(' ');
+};
 
 export const generateAsset = async ({
   imageBuffer,
