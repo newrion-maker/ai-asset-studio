@@ -4,3 +4,4 @@ dist/
 .npm-cache/
 frontend/dist/
 backend/dist/
+_archive/
