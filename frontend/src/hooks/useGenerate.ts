@@ -2,11 +2,14 @@ import { useCallback, useMemo } from 'react';
 import { apiGenerate } from '../services/api';
 import { useAppStore } from '../store/appStore';
 import type { ImagePlacement } from '../types';
-import { cropImage, postProcessGeneratedImage } from '../utils/imageUtils';
+import { cropImage, cropImagePolygon, createPolygonMask, postProcessGeneratedImage } from '../utils/imageUtils';
 
 export const useGenerate = (placement: ImagePlacement | null) => {
   const uploadedImageDataUrl = useAppStore((state) => state.uploadedImageDataUrl);
   const selection = useAppStore((state) => state.selection);
+  const selectionMode = useAppStore((state) => state.selectionMode);
+  const polygon = useAppStore((state) => state.polygon);
+  const polygonClosed = useAppStore((state) => state.polygonClosed);
   const prompt = useAppStore((state) => state.prompt);
   const outputMode = useAppStore((state) => state.outputMode);
   const generationSettings = useAppStore((state) => state.generationSettings);
@@ -29,10 +32,15 @@ export const useGenerate = (placement: ImagePlacement | null) => {
     setLoadingState('generating');
     setError(null);
     try {
+      const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
       const originalCropBase64 = await cropImage(uploadedImageDataUrl, selection, placement);
+      const maskBase64 = usePolygon
+        ? await createPolygonMask(uploadedImageDataUrl, polygon, placement)
+        : undefined;
       const selectionAspectRatio = selection.width / selection.height;
       const result = await apiGenerate({
         croppedImageBase64: originalCropBase64,
+        maskBase64,
         prompt,
         outputMode,
         selectedPreset,
@@ -66,9 +74,12 @@ export const useGenerate = (placement: ImagePlacement | null) => {
     generationSettings,
     outputMode,
     placement,
+    polygon,
+    polygonClosed,
     prompt,
     selectedPreset,
     selection,
+    selectionMode,
     setError,
     setGenerateResult,
     setLoadingState,
@@ -84,7 +95,10 @@ export const useGenerate = (placement: ImagePlacement | null) => {
     setLoadingState('processing');
     setError(null);
     try {
-      const originalCropBase64 = await cropImage(uploadedImageDataUrl, selection, placement);
+      const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
+      const originalCropBase64 = usePolygon
+        ? await cropImagePolygon(uploadedImageDataUrl, polygon, placement)
+        : await cropImage(uploadedImageDataUrl, selection, placement);
       const selectionAspectRatio = selection.width / selection.height;
       const processedResult = await postProcessGeneratedImage(
         originalCropBase64,
@@ -106,7 +120,10 @@ export const useGenerate = (placement: ImagePlacement | null) => {
   }, [
     generationSettings,
     placement,
+    polygon,
+    polygonClosed,
     selection,
+    selectionMode,
     setError,
     setGenerateResult,
     setLoadingState,

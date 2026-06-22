@@ -42,8 +42,30 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
     [stageSize.height, stageSize.width, uploadedImage],
   );
 
-  const { selection, isDrawing, startDrawing, updateDrawing, endDrawing, updateSelection, clearSelection } =
-    useSelection(placement);
+  const setSelectionMode = useAppStore((state) => state.setSelectionMode);
+  const {
+    selectionMode,
+    selection,
+    isDrawing,
+    startDrawing,
+    updateDrawing,
+    endDrawing,
+    updateSelection,
+    polygon,
+    polygonClosed,
+    polygonCursor,
+    addPolygonPoint,
+    updatePolygonCursor,
+    closePolygon,
+    undoPolygonPoint,
+    movePolygonVertex,
+    clearSelection,
+  } = useSelection(placement);
+
+  const changeMode = (mode: typeof selectionMode) => {
+    clearSelection();
+    setSelectionMode(mode);
+  };
 
   useEffect(() => {
     onPlacementChange(placement);
@@ -103,6 +125,61 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
           Clear Image
         </button>
       )}
+      {uploadedImage && (
+        <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
+          <div className="flex overflow-hidden rounded-xl bg-slate-950/80 p-1 shadow-md backdrop-blur dark:bg-white/90">
+            {(['rectangle', 'polygon'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  selectionMode === mode
+                    ? 'bg-white text-slate-950 dark:bg-slate-950 dark:text-white'
+                    : 'text-white/80 hover:text-white dark:text-slate-950/70 dark:hover:text-slate-950'
+                }`}
+                onClick={() => changeMode(mode)}
+              >
+                {mode === 'rectangle' ? 'Rectangle' : 'Lasso'}
+              </button>
+            ))}
+          </div>
+          {selectionMode === 'polygon' && polygon && polygon.length > 0 && (
+            <div className="flex gap-1">
+              <button
+                type="button"
+                className="rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:bg-slate-950 disabled:opacity-40 dark:bg-white/90 dark:text-slate-950"
+                onClick={undoPolygonPoint}
+              >
+                Undo
+              </button>
+              {!polygonClosed && (
+                <button
+                  type="button"
+                  className="rounded-lg bg-blue-600/90 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:bg-blue-600 disabled:opacity-40"
+                  onClick={closePolygon}
+                  disabled={polygon.length < 3}
+                >
+                  Close
+                </button>
+              )}
+              <button
+                type="button"
+                className="rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:bg-slate-950 dark:bg-white/90 dark:text-slate-950"
+                onClick={clearSelection}
+              >
+                Reset
+              </button>
+            </div>
+          )}
+          {selectionMode === 'polygon' && (
+            <p className="max-w-[220px] rounded-lg bg-slate-950/70 px-2.5 py-1.5 text-[11px] leading-4 text-white/90 shadow-md backdrop-blur dark:bg-white/85 dark:text-slate-900">
+              {polygonClosed
+                ? 'Drag points to adjust the shape.'
+                : 'Click to add points. Click the green start point or "Close" to finish.'}
+            </p>
+          )}
+        </div>
+      )}
       <Stage
         ref={stageRef}
         width={stageSize.width}
@@ -133,7 +210,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
           });
         }}
         onMouseDown={(event) => {
-          if (spacePressed || !placement || event.target.name() !== 'canvas-bg') {
+          if (selectionMode !== 'rectangle' || spacePressed || !placement || event.target.name() !== 'canvas-bg') {
             return;
           }
           const pointer = event.target.getStage()?.getRelativePointerPosition();
@@ -146,11 +223,29 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
             return;
           }
           const pointer = event.target.getStage()?.getRelativePointerPosition();
-          if (pointer) {
+          if (!pointer) {
+            return;
+          }
+          if (selectionMode === 'rectangle') {
             updateDrawing(pointer);
+          } else {
+            updatePolygonCursor(pointer);
           }
         }}
-        onMouseUp={endDrawing}
+        onMouseUp={() => {
+          if (selectionMode === 'rectangle') {
+            endDrawing();
+          }
+        }}
+        onClick={(event) => {
+          if (selectionMode !== 'polygon' || spacePressed || !placement || event.target.name() !== 'canvas-bg') {
+            return;
+          }
+          const pointer = event.target.getStage()?.getRelativePointerPosition();
+          if (pointer) {
+            addPolygonPoint(pointer);
+          }
+        }}
       >
         <Layer>
           <Rect name="canvas-bg" width={stageSize.width} height={stageSize.height} fill={darkMode ? '#111827' : '#f8fafc'} />
@@ -167,7 +262,16 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
         </Layer>
         {uploadedImage && placement && (
           <Layer>
-            <SelectionLayer selection={selection} isDrawing={isDrawing} onChange={updateSelection} />
+            <SelectionLayer
+              selectionMode={selectionMode}
+              selection={selection}
+              isDrawing={isDrawing}
+              onChange={updateSelection}
+              polygon={polygon}
+              polygonClosed={polygonClosed}
+              polygonCursor={polygonCursor}
+              onVertexMove={movePolygonVertex}
+            />
           </Layer>
         )}
       </Stage>

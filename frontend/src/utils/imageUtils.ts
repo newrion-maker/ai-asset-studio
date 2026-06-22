@@ -1,4 +1,4 @@
-import type { DownloadFormat, GenerationSettings, ImagePlacement, ResultAspectRatio, ResultSizePreset, SelectionRect } from '../types';
+import type { DownloadFormat, GenerationSettings, ImagePlacement, Point, ResultAspectRatio, ResultSizePreset, SelectionRect } from '../types';
 
 export const stripDataUrlPrefix = (value: string): string => value.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '');
 
@@ -31,28 +31,143 @@ export const normalizeRect = (rect: SelectionRect): SelectionRect => ({
   height: Math.abs(rect.height),
 });
 
+interface CropRect {
+  sourceX: number;
+  sourceY: number;
+  sourceWidth: number;
+  sourceHeight: number;
+  width: number;
+  height: number;
+}
+
+// Longest-edge cap for the crop/mask sent to OpenAI. gpt-image-1 outputs at most
+// 1024/1536px, so sending the full-resolution crop just bloats the request body
+// (which fails on Vercel's request size limit). Capping keeps the payload small.
+const MAX_UPLOAD_EDGE = 1024;
+
+// Source rectangle (in natural image pixels) plus the rounded output canvas size.
+// Shared by cropImage and the polygon mask/crop helpers so the crop and its mask
+// always come out with identical dimensions (required by OpenAI images.edit).
+const getCropRect = (img: HTMLImageElement, selection: SelectionRect, placement: ImagePlacement): CropRect => {
+  const normalized = normalizeRect(selection);
+  const sourceX = Math.max(0, (normalized.x - placement.x) / placement.scale);
+  const sourceY = Math.max(0, (normalized.y - placement.y) / placement.scale);
+  const sourceWidth = Math.min(img.naturalWidth - sourceX, normalized.width / placement.scale);
+  const sourceHeight = Math.min(img.naturalHeight - sourceY, normalized.height / placement.scale);
+  const downscale = Math.min(1, MAX_UPLOAD_EDGE / Math.max(sourceWidth, sourceHeight));
+  return {
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    width: Math.max(1, Math.round(sourceWidth * downscale)),
+    height: Math.max(1, Math.round(sourceHeight * downscale)),
+  };
+};
+
+export const polygonBounds = (points: Point[]): SelectionRect => {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
+// Trace the polygon onto a canvas context, mapping stage coordinates into the
+// cropped canvas space (crop top-left = origin, scaled to the rounded size).
+const tracePolygon = (
+  context: CanvasRenderingContext2D,
+  points: Point[],
+  placement: ImagePlacement,
+  crop: CropRect,
+): void => {
+  const scaleX = crop.width / crop.sourceWidth;
+  const scaleY = crop.height / crop.sourceHeight;
+  context.beginPath();
+  points.forEach((point, index) => {
+    const naturalX = (point.x - placement.x) / placement.scale;
+    const naturalY = (point.y - placement.y) / placement.scale;
+    const canvasX = (naturalX - crop.sourceX) * scaleX;
+    const canvasY = (naturalY - crop.sourceY) * scaleY;
+    if (index === 0) {
+      context.moveTo(canvasX, canvasY);
+    } else {
+      context.lineTo(canvasX, canvasY);
+    }
+  });
+  context.closePath();
+};
+
 export const cropImage = async (
   imageDataUrl: string,
   selection: SelectionRect,
   placement: ImagePlacement,
 ): Promise<string> => {
   const img = await loadImage(imageDataUrl);
-  const normalized = normalizeRect(selection);
-  const sourceX = Math.max(0, (normalized.x - placement.x) / placement.scale);
-  const sourceY = Math.max(0, (normalized.y - placement.y) / placement.scale);
-  const sourceWidth = Math.min(img.naturalWidth - sourceX, normalized.width / placement.scale);
-  const sourceHeight = Math.min(img.naturalHeight - sourceY, normalized.height / placement.scale);
+  const crop = getCropRect(img, selection, placement);
 
   const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.round(sourceWidth));
-  canvas.height = Math.max(1, Math.round(sourceHeight));
+  canvas.width = crop.width;
+  canvas.height = crop.height;
 
   const context = canvas.getContext('2d');
   if (!context) {
     throw new Error('Canvas is not available.');
   }
 
-  context.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+  context.drawImage(img, crop.sourceX, crop.sourceY, crop.sourceWidth, crop.sourceHeight, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/png');
+};
+
+// Alpha mask for OpenAI images.edit: inside the polygon stays opaque (kept),
+// outside is transparent (the editable region the model removes/regenerates).
+// Dimensions match cropImage's output for the same polygon bounds.
+export const createPolygonMask = async (
+  imageDataUrl: string,
+  polygon: Point[],
+  placement: ImagePlacement,
+): Promise<string> => {
+  const img = await loadImage(imageDataUrl);
+  const bounds = polygonBounds(polygon);
+  const crop = getCropRect(img, bounds, placement);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = crop.width;
+  canvas.height = crop.height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas is not available.');
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  tracePolygon(context, polygon, placement, crop);
+  context.fillStyle = '#ffffff';
+  context.fill();
+  return canvas.toDataURL('image/png');
+};
+
+// Pixel-accurate polygon crop: keeps the original pixels inside the polygon and
+// makes everything outside transparent. Used for "Crop Only" in polygon mode.
+export const cropImagePolygon = async (
+  imageDataUrl: string,
+  polygon: Point[],
+  placement: ImagePlacement,
+): Promise<string> => {
+  const img = await loadImage(imageDataUrl);
+  const bounds = polygonBounds(polygon);
+  const crop = getCropRect(img, bounds, placement);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = crop.width;
+  canvas.height = crop.height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas is not available.');
+  }
+
+  tracePolygon(context, polygon, placement, crop);
+  context.clip();
+  context.drawImage(img, crop.sourceX, crop.sourceY, crop.sourceWidth, crop.sourceHeight, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL('image/png');
 };
 

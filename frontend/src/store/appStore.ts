@@ -8,7 +8,9 @@ import type {
   HistoryItem,
   LoadingState,
   OutputMode,
+  Point,
   PresetStyle,
+  SelectionMode,
   SelectionRect,
 } from '../types';
 
@@ -16,6 +18,9 @@ interface AppState {
   uploadedImage: HTMLImageElement | null;
   uploadedImageDataUrl: string | null;
   selection: SelectionRect | null;
+  selectionMode: SelectionMode;
+  polygon: Point[] | null;
+  polygonClosed: boolean;
   prompt: string;
   outputMode: OutputMode;
   generationSettings: GenerationSettings;
@@ -33,6 +38,8 @@ interface AppState {
   setUploadedImage: (img: HTMLImageElement, dataUrl: string) => void;
   clearUploadedImage: () => void;
   setSelection: (sel: SelectionRect | null) => void;
+  setSelectionMode: (mode: SelectionMode) => void;
+  setPolygon: (polygon: Point[] | null, closed?: boolean) => void;
   setPrompt: (prompt: string) => void;
   setOutputMode: (mode: OutputMode) => void;
   setGenerationSettings: (settings: Partial<GenerationSettings>) => void;
@@ -69,6 +76,9 @@ export const useAppStore = create<AppState>((set) => ({
   uploadedImage: null,
   uploadedImageDataUrl: null,
   selection: null,
+  selectionMode: 'rectangle',
+  polygon: null,
+  polygonClosed: false,
   prompt: '',
   outputMode: 'transparent',
   generationSettings: defaultGenerationSettings,
@@ -84,18 +94,32 @@ export const useAppStore = create<AppState>((set) => ({
   historyOpen: true,
   settingsOpen: false,
   setUploadedImage: (img, dataUrl) =>
-    set({ uploadedImage: img, uploadedImageDataUrl: dataUrl, selection: null, generateResult: null, error: null, errorDetail: null }),
+    set({
+      uploadedImage: img,
+      uploadedImageDataUrl: dataUrl,
+      selection: null,
+      polygon: null,
+      polygonClosed: false,
+      generateResult: null,
+      error: null,
+      errorDetail: null,
+    }),
   clearUploadedImage: () =>
     set({
       uploadedImage: null,
       uploadedImageDataUrl: null,
       selection: null,
+      polygon: null,
+      polygonClosed: false,
       generateResult: null,
       loadingState: 'idle',
       error: null,
       errorDetail: null,
     }),
   setSelection: (selection) => set({ selection }),
+  setSelectionMode: (selectionMode) =>
+    set({ selectionMode, selection: null, polygon: null, polygonClosed: false }),
+  setPolygon: (polygon, closed = false) => set({ polygon, polygonClosed: closed }),
   setPrompt: (prompt) => set({ prompt }),
   setOutputMode: (outputMode) => set({ outputMode }),
   setGenerationSettings: (settings) =>

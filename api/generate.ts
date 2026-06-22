@@ -14,11 +14,15 @@ interface GenerationSettings {
 
 interface GenerateBody {
   croppedImageBase64?: string;
+  maskBase64?: string;
   prompt?: string;
   outputMode?: OutputMode;
   selectedPreset?: PresetStyle;
   generationSettings?: GenerationSettings;
 }
+
+const maskInstruction =
+  'A mask is provided. Only modify the fully transparent regions of the mask; keep the opaque (masked) subject pixels unchanged. Make the modified regions a clean, fully transparent background.';
 
 const basePrompts: Record<OutputMode, string> = {
   transparent:
@@ -130,6 +134,7 @@ export default async function handler(
     const body = readBody(req.body);
     const {
       croppedImageBase64,
+      maskBase64,
       prompt = '',
       outputMode = 'smart_auto',
       selectedPreset = 'original',
@@ -144,10 +149,15 @@ export default async function handler(
     const openai = new OpenAI({ apiKey });
     const imageBuffer = Buffer.from(stripDataUrlPrefix(croppedImageBase64), 'base64');
     const imageFile = await toFile(imageBuffer, 'crop.png', { type: 'image/png' });
+    const maskFile = maskBase64
+      ? await toFile(Buffer.from(stripDataUrlPrefix(maskBase64), 'base64'), 'mask.png', { type: 'image/png' })
+      : undefined;
+    const basePrompt = buildPrompt(prompt, outputMode, selectedPreset, generationSettings);
     const response = await openai.images.edit({
       model: process.env.OPENAI_IMAGE_MODEL ?? 'gpt-image-1',
       image: imageFile,
-      prompt: buildPrompt(prompt, outputMode, selectedPreset, generationSettings),
+      ...(maskFile ? { mask: maskFile } : {}),
+      prompt: maskFile ? `${basePrompt} ${maskInstruction}` : basePrompt,
       n: 1,
       size: chooseOpenAIImageSize(generationSettings),
       stream: false,

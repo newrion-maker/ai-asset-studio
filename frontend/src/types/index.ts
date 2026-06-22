@@ -26,6 +26,13 @@ export interface SelectionRect {
   height: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export type SelectionMode = 'rectangle' | 'polygon';
+
 export interface ImagePlacement {
   x: number;
   y: number;
@@ -52,6 +59,7 @@ export interface GenerationSettings {
 
 export interface GenerateRequest {
   croppedImageBase64: string;
+  maskBase64?: string;
   prompt: string;
   outputMode: OutputMode;
   selectedPreset: PresetStyle;

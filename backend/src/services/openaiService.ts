@@ -22,9 +22,13 @@ export interface GenerationSettings {
 
 interface GenerateAssetInput {
   imageBuffer: Buffer;
+  maskBuffer?: Buffer;
   prompt: string;
   generationSettings: GenerationSettings;
 }
+
+const maskInstruction =
+  'A mask is provided. Only modify the fully transparent regions of the mask; keep the opaque (masked) subject pixels unchanged. Make the modified regions a clean, fully transparent background.';
 
 interface GenerateAssetResult {
   imageBase64: string;
@@ -68,6 +72,7 @@ export const buildPrompt = (userPrompt: string, outputMode: OutputMode, selected
 
 export const generateAsset = async ({
   imageBuffer,
+  maskBuffer,
   prompt,
   generationSettings,
 }: GenerateAssetInput): Promise<GenerateAssetResult> => {
@@ -78,11 +83,14 @@ export const generateAsset = async ({
 
   const openai = new OpenAI({ apiKey });
   const imageFile = await toFile(imageBuffer, 'crop.png', { type: 'image/png' });
+  const maskFile = maskBuffer ? await toFile(maskBuffer, 'mask.png', { type: 'image/png' }) : undefined;
   const model = process.env.OPENAI_IMAGE_MODEL ?? 'gpt-image-1';
+  const aspectPrompt = buildAspectPrompt(prompt, generationSettings);
   const response = await openai.images.edit({
     model,
     image: imageFile,
-    prompt: buildAspectPrompt(prompt, generationSettings),
+    ...(maskFile ? { mask: maskFile } : {}),
+    prompt: maskFile ? `${aspectPrompt} ${maskInstruction}` : aspectPrompt,
     n: 1,
     size: chooseOpenAIImageSize(generationSettings),
     stream: false,

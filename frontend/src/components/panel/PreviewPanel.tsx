@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import type { ImagePlacement } from '../../types';
-import { cropImage } from '../../utils/imageUtils';
+import { cropImage, cropImagePolygon } from '../../utils/imageUtils';
 
 type PreviewBackground = 'white' | 'gray' | 'black' | 'checker';
 
@@ -10,6 +10,9 @@ const backgrounds: PreviewBackground[] = ['white', 'gray', 'black', 'checker'];
 export const PreviewPanel = ({ placement }: { placement: ImagePlacement | null }) => {
   const uploadedImageDataUrl = useAppStore((state) => state.uploadedImageDataUrl);
   const selection = useAppStore((state) => state.selection);
+  const selectionMode = useAppStore((state) => state.selectionMode);
+  const polygon = useAppStore((state) => state.polygon);
+  const polygonClosed = useAppStore((state) => state.polygonClosed);
   const [liveCrop, setLiveCrop] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,7 +23,12 @@ export const PreviewPanel = ({ placement }: { placement: ImagePlacement | null }
       return;
     }
 
-    void cropImage(uploadedImageDataUrl, selection, placement)
+    const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
+    const cropPromise = usePolygon
+      ? cropImagePolygon(uploadedImageDataUrl, polygon, placement)
+      : cropImage(uploadedImageDataUrl, selection, placement);
+
+    void cropPromise
       .then((crop) => {
         if (!cancelled) {
           setLiveCrop(crop);
@@ -35,7 +43,7 @@ export const PreviewPanel = ({ placement }: { placement: ImagePlacement | null }
     return () => {
       cancelled = true;
     };
-  }, [placement, selection, uploadedImageDataUrl]);
+  }, [placement, polygon, polygonClosed, selection, selectionMode, uploadedImageDataUrl]);
 
   return (
     <section className="space-y-2">
