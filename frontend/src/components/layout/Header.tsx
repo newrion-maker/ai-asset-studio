@@ -8,7 +8,6 @@ interface HeaderProps {
 
 export const Header = ({ upload }: HeaderProps) => {
   const t = useT();
-  const toggleHistory = useAppStore((state) => state.toggleHistory);
   const setSettingsOpen = useAppStore((state) => state.setSettingsOpen);
   const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
   const darkMode = useAppStore((state) => state.darkMode);
@@ -35,9 +34,6 @@ export const Header = ({ upload }: HeaderProps) => {
           </button>
           <button type="button" className="btn-secondary" onClick={toggleDarkMode}>
             {darkMode ? t('header.light') : t('header.dark')}
-          </button>
-          <button type="button" className="btn-secondary" onClick={toggleHistory}>
-            {t('header.history')}
           </button>
           <button type="button" className="btn-secondary" onClick={() => setSettingsOpen(true)}>
             {t('header.settings')}
