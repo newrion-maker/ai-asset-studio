@@ -1,12 +1,7 @@
 import { useAppStore } from '../../store/appStore';
-import { useImageUpload } from '../../hooks/useImageUpload';
 import { useT } from '../../i18n';
 
-interface HeaderProps {
-  upload: ReturnType<typeof useImageUpload>;
-}
-
-export const Header = ({ upload }: HeaderProps) => {
+export const Header = () => {
   const t = useT();
   const setSettingsOpen = useAppStore((state) => state.setSettingsOpen);
   const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
@@ -22,13 +17,6 @@ export const Header = ({ upload }: HeaderProps) => {
           <p className="text-xs text-slate-500 dark:text-slate-400">{t('app.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <input
-            ref={upload.inputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            onChange={upload.onInputChange}
-          />
           <button type="button" className="btn-secondary" onClick={toggleLanguage}>
             {language === 'ko' ? 'EN' : '한국어'}
           </button>
@@ -37,9 +25,6 @@ export const Header = ({ upload }: HeaderProps) => {
           </button>
           <button type="button" className="btn-secondary" onClick={() => setSettingsOpen(true)}>
             {t('header.settings')}
-          </button>
-          <button type="button" className="btn-primary" onClick={upload.openFileDialog}>
-            {t('header.upload')}
           </button>
         </div>
       </div>

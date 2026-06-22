@@ -36,12 +36,22 @@ export const MainPage = () => {
   return (
     <Layout>
       <div onDrop={upload.onDrop} onDragOver={upload.onDragOver}>
-        <Header upload={upload} />
+        <Header />
         <main className="mx-auto grid max-w-[1640px] gap-3 px-3 py-3">
+          <input
+            ref={upload.inputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={upload.onInputChange}
+          />
           <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)]">
             <div className="grid min-h-[560px] gap-3">
               <CanvasStage onPlacementChange={setPlacement} />
               <div className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900">
+                <button type="button" className="btn-secondary justify-center" onClick={upload.openFileDialog}>
+                  {t('header.upload')}
+                </button>
                 <div className="flex-1 text-sm text-slate-500 dark:text-slate-400">
                   {canGenerate ? t('action.ready') : t('action.notReady')}
                 </div>
