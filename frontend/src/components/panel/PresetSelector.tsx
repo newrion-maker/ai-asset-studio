@@ -1,27 +1,30 @@
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { PresetStyle } from '../../types';
 
-const presets: Array<{ value: PresetStyle; label: string }> = [
-  { value: 'original', label: 'Original' },
-  { value: 'flat', label: 'Flat' },
-  { value: 'clay', label: 'Clay' },
-  { value: '3d', label: '3D' },
-  { value: 'glass', label: 'Glass' },
-  { value: 'minimal', label: 'Minimal' },
-  { value: 'gradient', label: 'Gradient' },
-  { value: 'illustration', label: 'Illustration' },
-  { value: 'isometric', label: 'Isometric' },
-  { value: 'cartoon', label: 'Cartoon' },
-  { value: 'pictogram', label: 'Pictogram' },
+const presetValues: PresetStyle[] = [
+  'original',
+  'flat',
+  'clay',
+  '3d',
+  'glass',
+  'minimal',
+  'gradient',
+  'illustration',
+  'isometric',
+  'cartoon',
+  'pictogram',
 ];
 
 export const PresetSelector = () => {
+  const t = useT();
   const selectedPreset = useAppStore((state) => state.selectedPreset);
   const setSelectedPreset = useAppStore((state) => state.setSelectedPreset);
+  const presets = presetValues.map((value) => ({ value, label: t(`preset.${value}`) }));
 
   return (
     <section className="space-y-1.5">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Preset</h2>
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('preset.title')}</h2>
       <div className="grid grid-cols-3 gap-1.5">
         {presets.map((preset) => (
           <button

@@ -6,6 +6,7 @@ import type {
   GenerateResult,
   GenerationSettings,
   HistoryItem,
+  Language,
   LoadingState,
   OutputMode,
   Point,
@@ -33,6 +34,7 @@ interface AppState {
   assetLibrary: AssetItem[];
   history: HistoryItem[];
   darkMode: boolean;
+  language: Language;
   historyOpen: boolean;
   settingsOpen: boolean;
   setUploadedImage: (img: HTMLImageElement, dataUrl: string) => void;
@@ -53,6 +55,7 @@ interface AppState {
   deleteAsset: (id: string) => void;
   toggleFavorite: (id: string) => void;
   toggleDarkMode: () => void;
+  toggleLanguage: () => void;
   toggleHistory: () => void;
   setSettingsOpen: (open: boolean) => void;
 }
@@ -91,6 +94,7 @@ export const useAppStore = create<AppState>((set) => ({
   assetLibrary: [],
   history: [],
   darkMode: window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false,
+  language: (localStorage.getItem('language') as Language | null) ?? 'ko',
   historyOpen: true,
   settingsOpen: false,
   setUploadedImage: (img, dataUrl) =>
@@ -143,6 +147,12 @@ export const useAppStore = create<AppState>((set) => ({
       ),
     })),
   toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+  toggleLanguage: () =>
+    set((state) => {
+      const language: Language = state.language === 'ko' ? 'en' : 'ko';
+      localStorage.setItem('language', language);
+      return { language };
+    }),
   toggleHistory: () => set((state) => ({ historyOpen: !state.historyOpen })),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
 }));

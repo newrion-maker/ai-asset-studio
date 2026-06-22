@@ -3,6 +3,7 @@ import { Image as KonvaImage, Layer, Rect, Stage } from 'react-konva';
 import type Konva from 'konva';
 import { useSelection } from '../../hooks/useSelection';
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { ImagePlacement } from '../../types';
 import { getImagePlacement } from '../../utils/imageUtils';
 import { LoadingOverlay } from '../common/LoadingOverlay';
@@ -17,6 +18,7 @@ const WORK_STAGE_MIN_HEIGHT = 560;
 const WORK_STAGE_MAX_HEIGHT = 820;
 
 export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const uploadedImage = useAppStore((state) => state.uploadedImage);
@@ -122,7 +124,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
           className="absolute right-3 top-3 z-10 rounded-xl bg-slate-950/80 px-3 py-2 text-sm font-semibold text-white shadow-md backdrop-blur transition hover:bg-slate-950 dark:bg-white/90 dark:text-slate-950 dark:hover:bg-white"
           onClick={clearUploadedImage}
         >
-          Clear Image
+          {t('canvas.clear')}
         </button>
       )}
       {uploadedImage && (
@@ -139,7 +141,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
                 }`}
                 onClick={() => changeMode(mode)}
               >
-                {mode === 'rectangle' ? 'Rectangle' : 'Lasso'}
+                {mode === 'rectangle' ? t('canvas.rectangle') : t('canvas.lasso')}
               </button>
             ))}
           </div>
@@ -150,7 +152,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
                 className="rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:bg-slate-950 disabled:opacity-40 dark:bg-white/90 dark:text-slate-950"
                 onClick={undoPolygonPoint}
               >
-                Undo
+                {t('canvas.undo')}
               </button>
               {!polygonClosed && (
                 <button
@@ -159,7 +161,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
                   onClick={closePolygon}
                   disabled={polygon.length < 3}
                 >
-                  Close
+                  {t('canvas.close')}
                 </button>
               )}
               <button
@@ -167,15 +169,13 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
                 className="rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:bg-slate-950 dark:bg-white/90 dark:text-slate-950"
                 onClick={clearSelection}
               >
-                Reset
+                {t('canvas.reset')}
               </button>
             </div>
           )}
           {selectionMode === 'polygon' && (
             <p className="max-w-[220px] rounded-lg bg-slate-950/70 px-2.5 py-1.5 text-[11px] leading-4 text-white/90 shadow-md backdrop-blur dark:bg-white/85 dark:text-slate-900">
-              {polygonClosed
-                ? 'Drag points to adjust the shape.'
-                : 'Click to add points. Hover the start point (turns red) and click it, or use "Close", to finish.'}
+              {polygonClosed ? t('canvas.hint.closed') : t('canvas.hint.drawing')}
             </p>
           )}
         </div>
@@ -279,8 +279,8 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
       {!uploadedImage && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white/85 px-8 py-7 shadow-sm dark:border-slate-700 dark:bg-gray-950/85">
-            <p className="text-base font-semibold text-slate-900 dark:text-white">Drop, paste, or upload an image</p>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">PNG, JPEG, WEBP up to 30MB</p>
+            <p className="text-base font-semibold text-slate-900 dark:text-white">{t('canvas.drop')}</p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('canvas.formats')}</p>
           </div>
         </div>
       )}

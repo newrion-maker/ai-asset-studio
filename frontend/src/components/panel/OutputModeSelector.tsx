@@ -1,31 +1,22 @@
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { OutputMode } from '../../types';
 
-const modes: Array<{ value: OutputMode; label: string; description: string }> = [
-  {
-    value: 'keep_background',
-    label: 'Keep Background',
-    description: 'Preserve background, lighting, and atmosphere.',
-  },
-  {
-    value: 'transparent',
-    label: 'Transparent',
-    description: 'Extract the main object as a clean PNG asset.',
-  },
-  {
-    value: 'smart_auto',
-    label: 'Smart Auto',
-    description: 'Let AI choose the best output treatment.',
-  },
-];
+const modeValues: OutputMode[] = ['keep_background', 'transparent', 'smart_auto'];
 
 export const OutputModeSelector = () => {
+  const t = useT();
   const outputMode = useAppStore((state) => state.outputMode);
   const setOutputMode = useAppStore((state) => state.setOutputMode);
+  const modes = modeValues.map((value) => ({
+    value,
+    label: t(`outputMode.${value}`),
+    description: t(`outputMode.${value}.desc`),
+  }));
 
   return (
     <section className="space-y-1.5">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Output Mode</h2>
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('outputMode.title')}</h2>
       <div className="grid grid-cols-3 gap-1.5">
         {modes.map((mode) => (
           <button

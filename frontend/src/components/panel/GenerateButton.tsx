@@ -1,4 +1,5 @@
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 
 interface GenerateButtonProps {
   canGenerate: boolean;
@@ -6,6 +7,7 @@ interface GenerateButtonProps {
 }
 
 export const GenerateButton = ({ canGenerate, onGenerate }: GenerateButtonProps) => {
+  const t = useT();
   const loadingState = useAppStore((state) => state.loadingState);
   const disabled = !canGenerate || loadingState !== 'idle';
 
@@ -14,7 +16,7 @@ export const GenerateButton = ({ canGenerate, onGenerate }: GenerateButtonProps)
       {loadingState !== 'idle' && loadingState !== 'complete' ? (
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
       ) : null}
-      Generate
+      {t('action.generate')}
     </button>
   );
 };

@@ -1,49 +1,51 @@
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { FitMode, ResultAspectRatio, ResultSizePreset } from '../../types';
 
-const aspectOptions: Array<{ value: ResultAspectRatio; label: string; hint: string }> = [
-  { value: 'keep_selection', label: 'Selection', hint: 'as selected' },
-  { value: '1:1', label: '1:1', hint: 'icon' },
-  { value: '4:3', label: '4:3', hint: 'card' },
-  { value: '16:9', label: '16:9', hint: 'banner' },
-  { value: '2:1', label: '2:1', hint: 'wide' },
-];
-
-const sizeOptions: Array<{ value: ResultSizePreset; label: string; hint: string }> = [
-  { value: 'tiny', label: 'Tiny', hint: '128px' },
-  { value: 'small', label: 'Icon', hint: '256px' },
-  { value: 'preview', label: 'Small', hint: '512px' },
-  { value: 'standard', label: 'Normal', hint: '1024px' },
-  { value: 'large', label: 'Large', hint: 'AI size' },
-];
-
-const fitOptions: Array<{ value: FitMode; label: string; hint: string }> = [
-  { value: 'auto', label: 'Auto', hint: 'best' },
-  { value: 'contain', label: 'Pad', hint: 'no crop' },
-  { value: 'cover', label: 'Crop', hint: 'fill' },
-];
-
 export const GenerationSettingsPanel = () => {
+  const t = useT();
   const settings = useAppStore((state) => state.generationSettings);
   const setGenerationSettings = useAppStore((state) => state.setGenerationSettings);
 
+  const aspectOptions: Array<{ value: ResultAspectRatio; label: string; hint: string }> = [
+    { value: 'keep_selection', label: t('ratio.keep_selection'), hint: t('ratio.keep_selection.hint') },
+    { value: '1:1', label: '1:1', hint: t('ratio.1:1.hint') },
+    { value: '4:3', label: '4:3', hint: t('ratio.4:3.hint') },
+    { value: '16:9', label: '16:9', hint: t('ratio.16:9.hint') },
+    { value: '2:1', label: '2:1', hint: t('ratio.2:1.hint') },
+  ];
+
+  const sizeOptions: Array<{ value: ResultSizePreset; label: string; hint: string }> = [
+    { value: 'tiny', label: t('size.tiny'), hint: '128px' },
+    { value: 'small', label: t('size.small'), hint: '256px' },
+    { value: 'preview', label: t('size.preview'), hint: '512px' },
+    { value: 'standard', label: t('size.standard'), hint: '1024px' },
+    { value: 'large', label: t('size.large'), hint: t('size.large.hint') },
+  ];
+
+  const fitOptions: Array<{ value: FitMode; label: string; hint: string }> = [
+    { value: 'auto', label: t('fit.auto'), hint: t('fit.auto.hint') },
+    { value: 'contain', label: t('fit.contain'), hint: t('fit.contain.hint') },
+    { value: 'cover', label: t('fit.cover'), hint: t('fit.cover.hint') },
+  ];
+
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Result</h2>
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('settingsPanel.result')}</h2>
       <OptionRow
-        label="Ratio"
+        label={t('settingsPanel.ratio')}
         options={aspectOptions}
         value={settings.aspectRatio}
         onChange={(value) => setGenerationSettings({ aspectRatio: value as ResultAspectRatio })}
       />
       <OptionRow
-        label="Size"
+        label={t('settingsPanel.size')}
         options={sizeOptions}
         value={settings.sizePreset}
         onChange={(value) => setGenerationSettings({ sizePreset: value as ResultSizePreset })}
       />
       <OptionRow
-        label="Fit"
+        label={t('settingsPanel.fit')}
         options={fitOptions}
         value={settings.fitMode}
         onChange={(value) => setGenerationSettings({ fitMode: value as FitMode })}

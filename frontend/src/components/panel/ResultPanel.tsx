@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { DownloadFormat } from '../../types';
 import { downloadImage, generateFilename } from '../../utils/imageUtils';
 
@@ -8,6 +9,7 @@ type PreviewBackground = 'white' | 'gray' | 'black' | 'checker';
 const backgrounds: PreviewBackground[] = ['white', 'gray', 'black', 'checker'];
 
 export const ResultPanel = () => {
+  const t = useT();
   const [format, setFormat] = useState<DownloadFormat>('png');
   const [background, setBackground] = useState<PreviewBackground>('checker');
   const result = useAppStore((state) => state.generateResult);
@@ -31,7 +33,7 @@ export const ResultPanel = () => {
   return (
     <section className="flex min-h-0 flex-col rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Result</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('result.title')}</h2>
         {outputMode === 'transparent' && (
           <div className="flex rounded-xl border border-gray-200 p-1 dark:border-gray-700">
             {backgrounds.map((item) => (
@@ -43,7 +45,7 @@ export const ResultPanel = () => {
                 }`}
                 onClick={() => setBackground(item)}
               >
-                {item}
+                {t(`bg.${item}`)}
               </button>
             ))}
           </div>
@@ -54,7 +56,7 @@ export const ResultPanel = () => {
         {result ? (
           <img src={result.resultImageBase64} alt="Generated result" className="max-h-full max-w-full object-contain" />
         ) : (
-          <span className="px-4 text-center text-sm text-slate-500">Generated result will appear here.</span>
+          <span className="px-4 text-center text-sm text-slate-500">{t('result.empty')}</span>
         )}
       </div>
 
@@ -80,11 +82,11 @@ export const ResultPanel = () => {
             }
           }}
         >
-          Download
+          {t('result.download')}
         </button>
       </div>
       <button type="button" className="btn-secondary mt-2 justify-center" disabled={!result} onClick={() => setGenerateResult(null)}>
-        Delete Result
+        {t('result.delete')}
       </button>
     </section>
   );

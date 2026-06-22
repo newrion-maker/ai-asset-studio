@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
+import { useT } from '../../i18n';
 import type { ImagePlacement } from '../../types';
 import { cropImage, cropImagePolygon } from '../../utils/imageUtils';
 
@@ -8,6 +9,7 @@ type PreviewBackground = 'white' | 'gray' | 'black' | 'checker';
 const backgrounds: PreviewBackground[] = ['white', 'gray', 'black', 'checker'];
 
 export const PreviewPanel = ({ placement }: { placement: ImagePlacement | null }) => {
+  const t = useT();
   const uploadedImageDataUrl = useAppStore((state) => state.uploadedImageDataUrl);
   const selection = useAppStore((state) => state.selection);
   const selectionMode = useAppStore((state) => state.selectionMode);
@@ -47,8 +49,8 @@ export const PreviewPanel = ({ placement }: { placement: ImagePlacement | null }
 
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Selected Crop</h2>
-      <PreviewSlot label="Select an area to preview the exact crop" src={liveCrop ?? undefined} backgroundClass="bg-slate-100 dark:bg-gray-950" />
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('preview.title')}</h2>
+      <PreviewSlot label={t('preview.empty')} src={liveCrop ?? undefined} backgroundClass="bg-slate-100 dark:bg-gray-950" />
     </section>
   );
 };

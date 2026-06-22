@@ -13,20 +13,11 @@ import { ResultPanel } from '../components/panel/ResultPanel';
 import { useGenerate } from '../hooks/useGenerate';
 import { useImageUpload } from '../hooks/useImageUpload';
 import { useAppStore } from '../store/appStore';
-import type { ErrorType, ImagePlacement } from '../types';
-
-const errorMessages: Record<ErrorType, string> = {
-  unsupported_file: 'Unsupported file. Please upload PNG, JPEG, or WEBP.',
-  file_too_large: 'File is too large. Please use a file under 30MB.',
-  no_selection: 'Please select an area from the image first.',
-  config_error: 'OpenAI API key is not configured on the backend.',
-  billing_limit: 'OpenAI billing limit has been reached. Please check API billing settings.',
-  api_error: 'AI generation failed. Please try again.',
-  timeout: 'The request timed out. Please check the network and try again.',
-  network_error: 'Network connection failed. Please check the backend server.',
-};
+import { useT } from '../i18n';
+import type { ImagePlacement } from '../types';
 
 export const MainPage = () => {
+  const t = useT();
   const upload = useImageUpload();
   const [placement, setPlacement] = useState<ImagePlacement | null>(null);
   const { generate, cropOnly, canGenerate } = useGenerate(placement);
@@ -51,7 +42,7 @@ export const MainPage = () => {
               <CanvasStage onPlacementChange={setPlacement} />
               <div className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-soft dark:bg-gray-900">
                 <div className="flex-1 text-sm text-slate-500 dark:text-slate-400">
-                  {canGenerate ? 'Ready to generate. Adjust settings below if needed.' : 'Upload an image and select an area to enable generation.'}
+                  {canGenerate ? t('action.ready') : t('action.notReady')}
                 </div>
                 <button
                   type="button"
@@ -59,7 +50,7 @@ export const MainPage = () => {
                   disabled={!canGenerate}
                   onClick={() => void cropOnly()}
                 >
-                  Crop Only
+                  {t('action.cropOnly')}
                 </button>
                 <div className="min-w-[180px]">
                   <GenerateButton canGenerate={canGenerate} onGenerate={() => void generate()} />
@@ -81,16 +72,16 @@ export const MainPage = () => {
         </main>
       </div>
 
-      <Modal title="Settings" open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+      <Modal title={t('settings.title')} open={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-          <p>OpenAI API key is configured on the backend only.</p>
-          <p>Frontend endpoint: {import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}</p>
-          <p>Images are stored locally in this browser through IndexedDB.</p>
+          <p>{t('settings.key')}</p>
+          <p>{t('settings.endpoint')}: {import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}</p>
+          <p>{t('settings.storage')}</p>
         </div>
       </Modal>
 
-      <Modal title="Error" open={Boolean(error)} onClose={() => setError(null)}>
-        <p className="text-sm text-slate-700 dark:text-slate-200">{error ? errorMessages[error] : null}</p>
+      <Modal title={t('error.title')} open={Boolean(error)} onClose={() => setError(null)}>
+        <p className="text-sm text-slate-700 dark:text-slate-200">{error ? t(`error.${error}`) : null}</p>
         {errorDetail && (
           <p className="mt-3 rounded-xl bg-slate-100 p-3 text-xs leading-5 text-slate-600 dark:bg-gray-800 dark:text-slate-300">
             {errorDetail}
