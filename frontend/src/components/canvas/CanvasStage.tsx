@@ -12,9 +12,9 @@ interface CanvasStageProps {
   onPlacementChange: (placement: ImagePlacement | null) => void;
 }
 
-const EMPTY_STAGE_HEIGHT = 340;
-const WORK_STAGE_MIN_HEIGHT = 460;
-const WORK_STAGE_MAX_HEIGHT = 640;
+const EMPTY_STAGE_HEIGHT = 560;
+const WORK_STAGE_MIN_HEIGHT = 560;
+const WORK_STAGE_MAX_HEIGHT = 820;
 
 export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
