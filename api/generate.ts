@@ -51,7 +51,7 @@ const presetPrompts: Record<PresetStyle, string> = {
   illustration:
     'Create a warm editorial illustration. Use friendly simplified characters or objects when relevant, soft colors, clean shapes, balanced composition, and web-ready polish.',
   isometric:
-    'Create an isometric asset. Use a consistent three-quarter isometric angle, clean geometric structure, balanced depth, soft shadows, and clear spatial organization.',
+    'A highly detailed 3D render isometric view of the scene depicted in the input image. Isometric projection, precise 30-degree angles, no perspective, infinite focus. Clean and smooth 3D modeling style, high-resolution texture, studio lighting with soft shadows. The composition should maintain the relative placement of objects from the input image but arranged perfectly in an isometric grid. Isolated on a neutral white background for a clean diorama effect.',
   cartoon:
     'Create a fun cartoon-style asset. Use bold clean outlines, bright cheerful colors, simple exaggerated shapes, smooth flat shading with soft highlights, and a playful friendly character look.',
   pictogram:
