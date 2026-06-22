@@ -11,6 +11,7 @@ const presets: Array<{ value: PresetStyle; label: string }> = [
   { value: 'gradient', label: 'Gradient' },
   { value: 'illustration', label: 'Illustration' },
   { value: 'isometric', label: 'Isometric' },
+  { value: 'cartoon', label: 'Cartoon' },
 ];
 
 export const PresetSelector = () => {

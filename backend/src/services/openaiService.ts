@@ -10,7 +10,8 @@ export type PresetStyle =
   | 'minimal'
   | 'gradient'
   | 'illustration'
-  | 'isometric';
+  | 'isometric'
+  | 'cartoon';
 export type ResultAspectRatio = 'keep_selection' | '1:1' | '4:3' | '16:9' | '2:1';
 
 export interface GenerationSettings {
@@ -63,6 +64,8 @@ const presetPrompts: Record<PresetStyle, string> = {
     'Create a warm editorial illustration. Use friendly simplified characters or objects when relevant, soft colors, clean shapes, balanced composition, and web-ready polish.',
   isometric:
     'Create an isometric asset. Use a consistent three-quarter isometric angle, clean geometric structure, balanced depth, soft shadows, and clear spatial organization.',
+  cartoon:
+    'Create a fun cartoon-style asset. Use bold clean outlines, bright cheerful colors, simple exaggerated shapes, smooth flat shading with soft highlights, and a playful friendly character look.',
 };
 
 const commonQualityPrompt =

@@ -9,7 +9,8 @@ export type PresetStyle =
   | 'minimal'
   | 'gradient'
   | 'illustration'
-  | 'isometric';
+  | 'isometric'
+  | 'cartoon';
 
 export type DownloadFormat = 'png' | 'webp' | 'jpg';
 
