@@ -175,7 +175,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
             <p className="max-w-[220px] rounded-lg bg-slate-950/70 px-2.5 py-1.5 text-[11px] leading-4 text-white/90 shadow-md backdrop-blur dark:bg-white/85 dark:text-slate-900">
               {polygonClosed
                 ? 'Drag points to adjust the shape.'
-                : 'Click to add points. Click the green start point or "Close" to finish.'}
+                : 'Click to add points. Hover the start point (turns red) and click it, or use "Close", to finish.'}
             </p>
           )}
         </div>
@@ -271,6 +271,7 @@ export const CanvasStage = ({ onPlacementChange }: CanvasStageProps) => {
               polygonClosed={polygonClosed}
               polygonCursor={polygonCursor}
               onVertexMove={movePolygonVertex}
+              onClosePolygon={closePolygon}
             />
           </Layer>
         )}
