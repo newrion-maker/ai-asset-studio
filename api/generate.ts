@@ -1,7 +1,7 @@
 import OpenAI, { toFile } from 'openai';
 import { isAuthenticated } from './_auth';
 
-type OutputMode = 'keep_background' | 'transparent' | 'smart_auto' | 'remove_text';
+type OutputMode = 'keep_background' | 'transparent' | 'smart_auto';
 type PresetStyle = 'original' | 'flat' | 'clay' | '3d' | 'glass' | 'minimal' | 'gradient' | 'illustration' | 'isometric' | 'cartoon' | 'pictogram';
 type ResultAspectRatio = 'keep_selection' | '1:1' | '4:3' | '16:9' | '2:1';
 
@@ -32,8 +32,6 @@ const basePrompts: Record<OutputMode, string> = {
     'Keep the original composition. Preserve background. Preserve lighting. Preserve atmosphere. High quality. No text.',
   smart_auto:
     'Analyze the image. Choose the best output automatically. Preserve important visual elements. Maintain quality. No text.',
-  remove_text:
-    'Remove all text, letters, numbers, words, captions, logos, watermarks, and UI labels from the image. Seamlessly reconstruct the underlying background by extending the existing colors, gradients, patterns, lighting, and objects so the area looks natural and untouched, as if the text was never there. Keep every other visual element unchanged. Do not add any new text or symbols.',
 };
 
 const presetPrompts: Record<PresetStyle, string> = {

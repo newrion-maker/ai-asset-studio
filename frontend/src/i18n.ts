@@ -46,8 +46,6 @@ const en: Dict = {
   'outputMode.transparent.desc': 'Extract the main object as a clean PNG asset.',
   'outputMode.smart_auto': 'Smart Auto',
   'outputMode.smart_auto.desc': 'Let AI choose the best output treatment.',
-  'outputMode.remove_text': 'Remove Text',
-  'outputMode.remove_text.desc': 'Erase text in the selection and fill the background.',
 
   'settingsPanel.result': 'Result',
   'settingsPanel.ratio': 'Ratio',
@@ -170,8 +168,6 @@ const ko: Dict = {
   'outputMode.transparent.desc': '주요 객체만 깔끔한 PNG로 추출해요.',
   'outputMode.smart_auto': '스마트 자동',
   'outputMode.smart_auto.desc': 'AI가 최적의 출력 방식을 선택해요.',
-  'outputMode.remove_text': '텍스트 제거',
-  'outputMode.remove_text.desc': '선택 영역의 글자를 지우고 배경을 채워요.',
 
   'settingsPanel.result': '결과',
   'settingsPanel.ratio': '비율',

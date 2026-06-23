@@ -40,7 +40,6 @@ export const useGenerate = (placement: ImagePlacement | null) => {
       const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
       const originalCropBase64 = await cropImage(uploadedImageDataUrl, selection, placement);
       // The polygon mask is only for transparent extraction (keep inside, clear outside).
-      // Other modes (e.g. remove_text) edit the whole selected region instead.
       const maskBase64 =
         usePolygon && outputMode === 'transparent'
           ? await createPolygonMask(uploadedImageDataUrl, polygon, placement)
