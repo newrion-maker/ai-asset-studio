@@ -108,6 +108,7 @@ export const generateAsset = async ({
     prompt: maskFile ? `${aspectPrompt} ${maskInstruction}` : aspectPrompt,
     n: 1,
     size: chooseOpenAIImageSize(generationSettings),
+    quality: 'medium',
     ...(transparent ? { background: 'transparent' } : {}),
     stream: false,
   });

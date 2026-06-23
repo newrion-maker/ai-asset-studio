@@ -31,14 +31,14 @@ export const apiGenerate = async (req: GenerateRequest): Promise<GenerateResult>
   let response: Response;
   try {
     response = await fetch(`${API_BASE}/api/generate`, {
-    method: 'POST',
-    credentials: 'include',
+      method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.timeout(170_000),
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'TimeoutError') {
+    if (error instanceof DOMException && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
       throw new Error('timeout');
     }
     throw new Error('network_error');
@@ -52,5 +52,9 @@ export const apiGenerate = async (req: GenerateRequest): Promise<GenerateResult>
     throw new Error(errorBody?.message ?? errorBody?.error ?? `api_error:${response.status}`);
   }
 
-  return response.json() as Promise<GenerateResult>;
+  try {
+    return (await response.json()) as GenerateResult;
+  } catch {
+    throw new Error('timeout');
+  }
 };
