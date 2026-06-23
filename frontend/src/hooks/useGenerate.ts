@@ -39,9 +39,12 @@ export const useGenerate = (placement: ImagePlacement | null) => {
     try {
       const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
       const originalCropBase64 = await cropImage(uploadedImageDataUrl, selection, placement);
-      const maskBase64 = usePolygon
-        ? await createPolygonMask(uploadedImageDataUrl, polygon, placement)
-        : undefined;
+      // The polygon mask is only for transparent extraction (keep inside, clear outside).
+      // Other modes (e.g. remove_text) edit the whole selected region instead.
+      const maskBase64 =
+        usePolygon && outputMode === 'transparent'
+          ? await createPolygonMask(uploadedImageDataUrl, polygon, placement)
+          : undefined;
       const selectionAspectRatio = selection.width / selection.height;
       const result = await apiGenerate({
         croppedImageBase64: originalCropBase64,

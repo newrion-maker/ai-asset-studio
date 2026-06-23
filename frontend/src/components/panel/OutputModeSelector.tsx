@@ -2,7 +2,7 @@ import { useAppStore } from '../../store/appStore';
 import { useT } from '../../i18n';
 import type { OutputMode } from '../../types';
 
-const modeValues: OutputMode[] = ['keep_background', 'transparent', 'smart_auto'];
+const modeValues: OutputMode[] = ['keep_background', 'transparent', 'smart_auto', 'remove_text'];
 
 export const OutputModeSelector = () => {
   const t = useT();
@@ -17,7 +17,7 @@ export const OutputModeSelector = () => {
   return (
     <section className="space-y-1.5">
       <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{t('outputMode.title')}</h2>
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {modes.map((mode) => (
           <button
             key={mode.value}
