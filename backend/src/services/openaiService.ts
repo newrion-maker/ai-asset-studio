@@ -1,6 +1,6 @@
 import OpenAI, { toFile } from 'openai';
 
-export type OutputMode = 'keep_background' | 'transparent' | 'smart_auto';
+export type OutputMode = 'keep_background' | 'transparent' | 'smart_auto' | 'eraser';
 export type PresetStyle =
   | 'original'
   | 'flat'
@@ -28,11 +28,15 @@ interface GenerateAssetInput {
   prompt: string;
   generationSettings: GenerationSettings;
   transparent?: boolean;
+  eraser?: boolean;
   apiKey: string;
 }
 
 const maskInstruction =
   'A mask is provided. Only modify the fully transparent regions of the mask; keep the opaque (masked) subject pixels unchanged. Make the modified regions a clean, fully transparent background.';
+
+const eraserMaskInstruction =
+  'A mask marks a region to edit. Completely remove whatever is inside the masked (transparent) region and realistically fill it in by extending the surrounding background, textures, colors, gradients, lighting, and patterns so the area looks natural and seamless, as if the removed content was never there. Keep every non-masked area exactly unchanged. Do not add any new objects, people, or text.';
 
 interface GenerateAssetResult {
   imageBase64: string;
@@ -45,6 +49,8 @@ const basePrompts: Record<OutputMode, string> = {
     'Keep the original composition. Preserve background. Preserve lighting. Preserve atmosphere. High quality. No text.',
   smart_auto:
     'Analyze the image. Choose the best output automatically. Preserve important visual elements. Maintain quality. No text.',
+  eraser:
+    'Remove the masked content and reconstruct the underlying background seamlessly. Keep everything else unchanged. High quality. No text.',
 };
 
 const presetPrompts: Record<PresetStyle, string> = {
@@ -92,6 +98,7 @@ export const generateAsset = async ({
   prompt,
   generationSettings,
   transparent,
+  eraser,
   apiKey,
 }: GenerateAssetInput): Promise<GenerateAssetResult> => {
   const openai = new OpenAI({ apiKey });
@@ -103,7 +110,7 @@ export const generateAsset = async ({
     model,
     image: imageFile,
     ...(maskFile ? { mask: maskFile } : {}),
-    prompt: maskFile ? `${aspectPrompt} ${maskInstruction}` : aspectPrompt,
+    prompt: maskFile ? `${aspectPrompt} ${eraser ? eraserMaskInstruction : maskInstruction}` : aspectPrompt,
     n: 1,
     size: chooseOpenAIImageSize(generationSettings),
     quality: 'medium',

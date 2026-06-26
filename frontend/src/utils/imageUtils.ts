@@ -171,6 +171,113 @@ export const cropImagePolygon = async (
   return canvas.toDataURL('image/png');
 };
 
+// --- Eraser (inpaint) helpers ---
+
+// Trace the selected region (polygon if provided, otherwise the rectangle) onto
+// a 2D context, mapping stage coordinates to the target canvas via `mapPoint`.
+const traceRegion = (
+  context: CanvasRenderingContext2D,
+  selection: SelectionRect,
+  polygon: Point[] | null,
+  mapPoint: (x: number, y: number) => Point,
+): void => {
+  context.beginPath();
+  if (polygon && polygon.length >= 3) {
+    polygon.forEach((point, index) => {
+      const mapped = mapPoint(point.x, point.y);
+      if (index === 0) {
+        context.moveTo(mapped.x, mapped.y);
+      } else {
+        context.lineTo(mapped.x, mapped.y);
+      }
+    });
+    context.closePath();
+  } else {
+    const normalized = normalizeRect(selection);
+    const topLeft = mapPoint(normalized.x, normalized.y);
+    const bottomRight = mapPoint(normalized.x + normalized.width, normalized.y + normalized.height);
+    context.rect(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+  }
+};
+
+// Build the full (downscaled) image and an aligned mask for OpenAI inpainting.
+// The selected region is made fully transparent in the mask (= the area OpenAI
+// regenerates); everything else stays opaque (= kept).
+export const buildErasePayload = async (
+  imageDataUrl: string,
+  selection: SelectionRect,
+  polygon: Point[] | null,
+  placement: ImagePlacement,
+  maxEdge = 1024,
+): Promise<{ imageBase64: string; maskBase64: string; width: number; height: number }> => {
+  const img = await loadImage(imageDataUrl);
+  const downscale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
+  const width = Math.max(1, Math.round(img.naturalWidth * downscale));
+  const height = Math.max(1, Math.round(img.naturalHeight * downscale));
+
+  const imageCanvas = document.createElement('canvas');
+  imageCanvas.width = width;
+  imageCanvas.height = height;
+  const imageContext = imageCanvas.getContext('2d');
+  if (!imageContext) {
+    throw new Error('Canvas is not available.');
+  }
+  imageContext.drawImage(img, 0, 0, width, height);
+
+  const maskCanvas = document.createElement('canvas');
+  maskCanvas.width = width;
+  maskCanvas.height = height;
+  const maskContext = maskCanvas.getContext('2d');
+  if (!maskContext) {
+    throw new Error('Canvas is not available.');
+  }
+  maskContext.fillStyle = '#ffffff';
+  maskContext.fillRect(0, 0, width, height);
+  maskContext.globalCompositeOperation = 'destination-out';
+  const toDownscaled = (x: number, y: number): Point => ({
+    x: ((x - placement.x) / placement.scale) * downscale,
+    y: ((y - placement.y) / placement.scale) * downscale,
+  });
+  traceRegion(maskContext, selection, polygon, toDownscaled);
+  maskContext.fill();
+
+  return { imageBase64: imageCanvas.toDataURL('image/png'), maskBase64: maskCanvas.toDataURL('image/png'), width, height };
+};
+
+// Composite: keep the original image at full resolution everywhere, and replace
+// only the selected region with the AI-filled pixels.
+export const compositeErase = async (
+  originalDataUrl: string,
+  resultDataUrl: string,
+  selection: SelectionRect,
+  polygon: Point[] | null,
+  placement: ImagePlacement,
+): Promise<string> => {
+  const original = await loadImage(originalDataUrl);
+  const result = await loadImage(resultDataUrl);
+  const width = original.naturalWidth;
+  const height = original.naturalHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas is not available.');
+  }
+  context.drawImage(original, 0, 0);
+  context.save();
+  const toNatural = (x: number, y: number): Point => ({
+    x: (x - placement.x) / placement.scale,
+    y: (y - placement.y) / placement.scale,
+  });
+  traceRegion(context, selection, polygon, toNatural);
+  context.clip();
+  context.drawImage(result, 0, 0, width, height);
+  context.restore();
+  return canvas.toDataURL('image/png');
+};
+
 export const getAspectRatioValue = (aspectRatio: ResultAspectRatio, fallback: number): number => {
   if (aspectRatio === 'keep_selection') {
     return fallback;

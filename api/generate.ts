@@ -1,7 +1,7 @@
 import OpenAI, { toFile } from 'openai';
 import { isAuthenticated } from './_auth';
 
-type OutputMode = 'keep_background' | 'transparent' | 'smart_auto';
+type OutputMode = 'keep_background' | 'transparent' | 'smart_auto' | 'eraser';
 type PresetStyle = 'original' | 'flat' | 'clay' | '3d' | 'glass' | 'minimal' | 'gradient' | 'illustration' | 'isometric' | 'cartoon' | 'pictogram';
 type ResultAspectRatio = 'keep_selection' | '1:1' | '4:3' | '16:9' | '2:1';
 
@@ -25,6 +25,9 @@ interface GenerateBody {
 const maskInstruction =
   'A mask is provided. Only modify the fully transparent regions of the mask; keep the opaque (masked) subject pixels unchanged. Make the modified regions a clean, fully transparent background.';
 
+const eraserMaskInstruction =
+  'A mask marks a region to edit. Completely remove whatever is inside the masked (transparent) region and realistically fill it in by extending the surrounding background, textures, colors, gradients, lighting, and patterns so the area looks natural and seamless, as if the removed content was never there. Keep every non-masked area exactly unchanged. Do not add any new objects, people, or text.';
+
 const basePrompts: Record<OutputMode, string> = {
   transparent:
     'Keep only the primary object. Remove every background. Generate a transparent PNG. Preserve original proportions. High quality. No text. Soft edges.',
@@ -32,6 +35,8 @@ const basePrompts: Record<OutputMode, string> = {
     'Keep the original composition. Preserve background. Preserve lighting. Preserve atmosphere. High quality. No text.',
   smart_auto:
     'Analyze the image. Choose the best output automatically. Preserve important visual elements. Maintain quality. No text.',
+  eraser:
+    'Remove the masked content and reconstruct the underlying background seamlessly. Keep everything else unchanged. High quality. No text.',
 };
 
 const presetPrompts: Record<PresetStyle, string> = {
@@ -174,7 +179,9 @@ export default async function handler(
       model: process.env.OPENAI_IMAGE_MODEL ?? 'gpt-image-1',
       image: imageFile,
       ...(maskFile ? { mask: maskFile } : {}),
-      prompt: maskFile ? `${basePrompt} ${maskInstruction}` : basePrompt,
+      prompt: maskFile
+        ? `${basePrompt} ${outputMode === 'eraser' ? eraserMaskInstruction : maskInstruction}`
+        : basePrompt,
       n: 1,
       size: chooseOpenAIImageSize(generationSettings),
       quality: 'medium',

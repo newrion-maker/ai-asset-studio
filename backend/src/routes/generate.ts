@@ -46,6 +46,7 @@ generateRouter.post('/generate', async (req, res, next) => {
       prompt: fullPrompt,
       generationSettings,
       transparent: outputMode === 'transparent',
+      eraser: outputMode === 'eraser',
       apiKey: userApiKey,
     });
 

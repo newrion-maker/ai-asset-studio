@@ -2,7 +2,14 @@ import { useCallback, useMemo } from 'react';
 import { apiGenerate } from '../services/api';
 import { useAppStore } from '../store/appStore';
 import type { ImagePlacement } from '../types';
-import { cropImage, cropImagePolygon, createPolygonMask, postProcessGeneratedImage } from '../utils/imageUtils';
+import {
+  buildErasePayload,
+  compositeErase,
+  cropImage,
+  cropImagePolygon,
+  createPolygonMask,
+  postProcessGeneratedImage,
+} from '../utils/imageUtils';
 
 export const useGenerate = (placement: ImagePlacement | null) => {
   const uploadedImageDataUrl = useAppStore((state) => state.uploadedImageDataUrl);
@@ -38,6 +45,39 @@ export const useGenerate = (placement: ImagePlacement | null) => {
     setError(null);
     try {
       const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
+
+      // Eraser: send the whole image plus a mask of the selected region, then
+      // composite only that region back onto the full-resolution original.
+      if (outputMode === 'eraser') {
+        const erasePolygon = usePolygon ? polygon : null;
+        const { imageBase64, maskBase64: eraseMask, width, height } = await buildErasePayload(
+          uploadedImageDataUrl,
+          selection,
+          erasePolygon,
+          placement,
+        );
+        const eraseResult = await apiGenerate({
+          croppedImageBase64: imageBase64,
+          maskBase64: eraseMask,
+          prompt,
+          outputMode: 'eraser',
+          selectedPreset,
+          generationSettings: { ...generationSettings, aspectRatio: 'keep_selection', selectionAspectRatio: width / height },
+          apiKey,
+        });
+        const composited = await compositeErase(
+          uploadedImageDataUrl,
+          eraseResult.resultImageBase64,
+          selection,
+          erasePolygon,
+          placement,
+        );
+        setGenerateResult({ resultImageBase64: composited, originalCropBase64: uploadedImageDataUrl });
+        setLoadingState('complete');
+        window.setTimeout(() => setLoadingState('idle'), 1500);
+        return;
+      }
+
       const originalCropBase64 = await cropImage(uploadedImageDataUrl, selection, placement);
       // The polygon mask is only for transparent extraction (keep inside, clear outside).
       const maskBase64 =
