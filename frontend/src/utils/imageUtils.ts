@@ -266,15 +266,45 @@ export const compositeErase = async (
     throw new Error('Canvas is not available.');
   }
   context.drawImage(original, 0, 0);
-  context.save();
+
   const toNatural = (x: number, y: number): Point => ({
     x: (x - placement.x) / placement.scale,
     y: (y - placement.y) / placement.scale,
   });
-  traceRegion(context, selection, polygon, toNatural);
-  context.clip();
-  context.drawImage(result, 0, 0, width, height);
-  context.restore();
+
+  // The AI fill scaled to full resolution.
+  const patch = document.createElement('canvas');
+  patch.width = width;
+  patch.height = height;
+  const patchContext = patch.getContext('2d');
+  if (!patchContext) {
+    throw new Error('Canvas is not available.');
+  }
+  patchContext.drawImage(result, 0, 0, width, height);
+
+  // A soft (feathered) mask of the selected region: solid in the centre, fading
+  // at the edges so the AI fill blends into the original instead of leaving a
+  // hard rectangular/polygon seam.
+  const mask = document.createElement('canvas');
+  mask.width = width;
+  mask.height = height;
+  const maskContext = mask.getContext('2d');
+  if (!maskContext) {
+    throw new Error('Canvas is not available.');
+  }
+  const feather = Math.max(2, Math.round(Math.min(width, height) * 0.012));
+  maskContext.fillStyle = '#ffffff';
+  maskContext.filter = `blur(${feather}px)`;
+  traceRegion(maskContext, selection, polygon, toNatural);
+  maskContext.fill();
+  maskContext.filter = 'none';
+
+  // Keep only the feathered region of the AI fill, then lay it over the original.
+  patchContext.globalCompositeOperation = 'destination-in';
+  patchContext.drawImage(mask, 0, 0);
+  patchContext.globalCompositeOperation = 'source-over';
+
+  context.drawImage(patch, 0, 0);
   return canvas.toDataURL('image/png');
 };
 
