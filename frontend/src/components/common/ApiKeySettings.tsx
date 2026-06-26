@@ -43,6 +43,10 @@ export const ApiKeySettings = () => {
       <p className="rounded-xl bg-slate-100 p-3 text-xs leading-5 text-slate-600 dark:bg-gray-800 dark:text-slate-300">
         {t('settings.apiKey.notice')}
       </p>
+      <div className="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+        <p className="mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">{t('settings.apiKey.stepsTitle')}</p>
+        <p className="whitespace-pre-line text-xs leading-5 text-slate-600 dark:text-slate-300">{t('settings.apiKey.steps')}</p>
+      </div>
       <a
         href="https://platform.openai.com/api-keys"
         target="_blank"

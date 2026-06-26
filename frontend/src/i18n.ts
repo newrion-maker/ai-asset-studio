@@ -37,6 +37,9 @@ const en: Dict = {
   'settings.apiKey.saved': 'A key is saved on this device.',
   'settings.apiKey.notice':
     'Your key is stored only in this browser and sent to the server only to run your request. Do not enter it on a shared computer.',
+  'settings.apiKey.stepsTitle': 'How to get a key',
+  'settings.apiKey.steps':
+    '1. Sign in at platform.openai.com\n2. Add a payment method and a small balance (Billing) — required for image generation\n3. Create a new key under "API keys"\n4. Copy it, paste it above, and press Save',
   'settings.apiKey.getKey': 'Get an OpenAI API key',
   'settings.storage': 'Images are stored locally in this browser through IndexedDB.',
 
@@ -174,6 +177,9 @@ const ko: Dict = {
   'settings.apiKey.saved': '이 기기에 키가 저장되어 있어요.',
   'settings.apiKey.notice':
     '키는 이 브라우저에만 저장되고, 요청 실행을 위해서만 서버로 전송돼요. 공용 PC에서는 입력하지 마세요.',
+  'settings.apiKey.stepsTitle': '키 발급 방법',
+  'settings.apiKey.steps':
+    '1. platform.openai.com 로그인\n2. 결제수단 등록 + 소액 충전 (Billing) — 이미지 생성에 필요해요\n3. "API keys"에서 새 키 생성\n4. 복사해서 위 칸에 붙여넣고 저장 누르기',
   'settings.apiKey.getKey': 'OpenAI API 키 발급받기',
   'settings.storage': '이미지는 이 브라우저의 IndexedDB에 로컬로 저장돼요.',
 
