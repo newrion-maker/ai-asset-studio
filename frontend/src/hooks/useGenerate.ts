@@ -4,10 +4,10 @@ import { useAppStore } from '../store/appStore';
 import type { ImagePlacement } from '../types';
 import {
   buildErasePayload,
-  compositeErase,
   cropImage,
   cropImagePolygon,
   createPolygonMask,
+  fitResultToOriginal,
   postProcessGeneratedImage,
 } from '../utils/imageUtils';
 
@@ -65,14 +65,8 @@ export const useGenerate = (placement: ImagePlacement | null) => {
           generationSettings: { ...generationSettings, aspectRatio: 'keep_selection', selectionAspectRatio: width / height },
           apiKey,
         });
-        const composited = await compositeErase(
-          uploadedImageDataUrl,
-          eraseResult.resultImageBase64,
-          selection,
-          erasePolygon,
-          placement,
-        );
-        setGenerateResult({ resultImageBase64: composited, originalCropBase64: uploadedImageDataUrl });
+        const finalImage = await fitResultToOriginal(eraseResult.resultImageBase64, uploadedImageDataUrl);
+        setGenerateResult({ resultImageBase64: finalImage, originalCropBase64: uploadedImageDataUrl });
         setLoadingState('complete');
         window.setTimeout(() => setLoadingState('idle'), 1500);
         return;

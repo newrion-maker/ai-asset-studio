@@ -308,6 +308,22 @@ export const compositeErase = async (
   return canvas.toDataURL('image/png');
 };
 
+// Resize the AI result back to the original image's exact dimensions, so the
+// returned (size-bucketed) image keeps the original aspect ratio.
+export const fitResultToOriginal = async (resultDataUrl: string, originalDataUrl: string): Promise<string> => {
+  const result = await loadImage(resultDataUrl);
+  const original = await loadImage(originalDataUrl);
+  const canvas = document.createElement('canvas');
+  canvas.width = original.naturalWidth;
+  canvas.height = original.naturalHeight;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas is not available.');
+  }
+  context.drawImage(result, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/png');
+};
+
 export const getAspectRatioValue = (aspectRatio: ResultAspectRatio, fallback: number): number => {
   if (aspectRatio === 'keep_selection') {
     return fallback;
