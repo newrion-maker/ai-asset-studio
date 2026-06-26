@@ -37,7 +37,7 @@ const en: Dict = {
   'settings.apiKey.saved': 'A key is saved on this device.',
   'settings.apiKey.notice':
     'Your key is stored only in this browser and sent to the server only to run your request. Do not enter it on a shared computer.',
-  'settings.apiKey.getKey': 'Get a key at platform.openai.com',
+  'settings.apiKey.getKey': 'Get an OpenAI API key',
   'settings.storage': 'Images are stored locally in this browser through IndexedDB.',
 
   'error.title': 'Error',
@@ -174,7 +174,7 @@ const ko: Dict = {
   'settings.apiKey.saved': '이 기기에 키가 저장되어 있어요.',
   'settings.apiKey.notice':
     '키는 이 브라우저에만 저장되고, 요청 실행을 위해서만 서버로 전송돼요. 공용 PC에서는 입력하지 마세요.',
-  'settings.apiKey.getKey': 'platform.openai.com에서 키를 발급받을 수 있어요',
+  'settings.apiKey.getKey': 'OpenAI API 키 발급받기',
   'settings.storage': '이미지는 이 브라우저의 IndexedDB에 로컬로 저장돼요.',
 
   'error.title': '오류',

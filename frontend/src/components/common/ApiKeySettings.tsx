@@ -43,7 +43,14 @@ export const ApiKeySettings = () => {
       <p className="rounded-xl bg-slate-100 p-3 text-xs leading-5 text-slate-600 dark:bg-gray-800 dark:text-slate-300">
         {t('settings.apiKey.notice')}
       </p>
-      <p className="text-xs text-slate-500">{t('settings.apiKey.getKey')}</p>
+      <a
+        href="https://platform.openai.com/api-keys"
+        target="_blank"
+        rel="noreferrer noopener"
+        className="btn-secondary inline-flex justify-center px-4 text-xs"
+      >
+        {t('settings.apiKey.getKey')} ↗
+      </a>
       <p className="text-xs text-slate-500">{t('settings.storage')}</p>
     </div>
   );
