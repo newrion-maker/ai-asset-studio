@@ -2,7 +2,7 @@ import { useAppStore } from '../../store/appStore';
 import { useT } from '../../i18n';
 import type { OutputMode } from '../../types';
 
-const modeValues: OutputMode[] = ['keep_background', 'transparent', 'smart_auto', 'eraser'];
+const modeValues: OutputMode[] = ['keep_background', 'transparent', 'smart_auto', 'eraser', 'solid_fill'];
 
 export const OutputModeSelector = () => {
   const t = useT();

@@ -1,6 +1,6 @@
 export type Language = 'ko' | 'en';
 
-export type OutputMode = 'keep_background' | 'transparent' | 'smart_auto' | 'eraser';
+export type OutputMode = 'keep_background' | 'transparent' | 'smart_auto' | 'eraser' | 'solid_fill';
 
 export type PresetStyle =
   | 'original'

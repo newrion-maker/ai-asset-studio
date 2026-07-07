@@ -244,6 +244,93 @@ export const buildErasePayload = async (
   return { imageBase64: imageCanvas.toDataURL('image/png'), maskBase64: maskCanvas.toDataURL('image/png'), width, height };
 };
 
+// Non-AI fill: replace the selected region with the average colour sampled from
+// just outside it. Instant and free; ideal for solid/near-uniform backgrounds
+// (e.g. removing a number from a solid badge). Keeps all other pixels intact.
+export const fillRegionSolid = async (
+  imageDataUrl: string,
+  selection: SelectionRect,
+  polygon: Point[] | null,
+  placement: ImagePlacement,
+): Promise<string> => {
+  const img = await loadImage(imageDataUrl);
+  const width = img.naturalWidth;
+  const height = img.naturalHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas is not available.');
+  }
+  context.drawImage(img, 0, 0);
+
+  const toNatural = (x: number, y: number): Point => ({
+    x: (x - placement.x) / placement.scale,
+    y: (y - placement.y) / placement.scale,
+  });
+
+  // Region bounding box in natural pixels.
+  const corners =
+    polygon && polygon.length >= 3
+      ? polygon.map((point) => toNatural(point.x, point.y))
+      : (() => {
+          const n = normalizeRect(selection);
+          const tl = toNatural(n.x, n.y);
+          const br = toNatural(n.x + n.width, n.y + n.height);
+          return [tl, { x: br.x, y: tl.y }, br, { x: tl.x, y: br.y }];
+        })();
+  const xs = corners.map((point) => point.x);
+  const ys = corners.map((point) => point.y);
+  const minX = Math.max(0, Math.floor(Math.min(...xs)));
+  const maxX = Math.min(width - 1, Math.ceil(Math.max(...xs)));
+  const minY = Math.max(0, Math.floor(Math.min(...ys)));
+  const maxY = Math.min(height - 1, Math.ceil(Math.max(...ys)));
+  const pad = Math.max(2, Math.round(Math.min(width, height) * 0.01));
+
+  // Sample a ring just outside the bounding box and average it.
+  const data = context.getImageData(0, 0, width, height).data;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let count = 0;
+  const sample = (x: number, y: number): void => {
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+      return;
+    }
+    const i = (y * width + x) * 4;
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    count += 1;
+  };
+  for (let x = minX - pad; x <= maxX + pad; x += 1) {
+    sample(x, minY - pad);
+    sample(x, maxY + pad);
+  }
+  for (let y = minY - pad; y <= maxY + pad; y += 1) {
+    sample(minX - pad, y);
+    sample(maxX + pad, y);
+  }
+  if (count === 0) {
+    for (let x = minX; x <= maxX; x += 1) {
+      sample(x, minY);
+      sample(x, maxY);
+    }
+    for (let y = minY; y <= maxY; y += 1) {
+      sample(minX, y);
+      sample(maxX, y);
+    }
+  }
+  const fill = count > 0 ? `rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})` : '#ffffff';
+
+  context.fillStyle = fill;
+  traceRegion(context, selection, polygon, toNatural);
+  context.fill();
+  return canvas.toDataURL('image/png');
+};
+
 // Composite: keep the original image at full resolution everywhere, and replace
 // only the selected region with the AI-filled pixels.
 export const compositeErase = async (

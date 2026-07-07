@@ -64,6 +64,8 @@ const en: Dict = {
   'outputMode.smart_auto.desc': 'Let AI choose the best output treatment.',
   'outputMode.eraser': 'Eraser',
   'outputMode.eraser.desc': 'Remove the selected area and fill it from the background.',
+  'outputMode.solid_fill': 'Solid Fill',
+  'outputMode.solid_fill.desc': 'Fill the selection with the surrounding color (no AI, instant).',
 
   'settingsPanel.result': 'Result',
   'settingsPanel.ratio': 'Ratio',
@@ -204,6 +206,8 @@ const ko: Dict = {
   'outputMode.smart_auto.desc': 'AI가 최적의 출력 방식을 선택해요.',
   'outputMode.eraser': '지우개',
   'outputMode.eraser.desc': '선택한 영역을 지우고 배경으로 채워요.',
+  'outputMode.solid_fill': '단색 채우기',
+  'outputMode.solid_fill.desc': '선택 영역을 주변 색으로 채워요 (AI 없이, 즉시).',
 
   'settingsPanel.result': '결과',
   'settingsPanel.ratio': '비율',

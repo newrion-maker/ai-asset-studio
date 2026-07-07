@@ -7,6 +7,7 @@ import {
   cropImage,
   cropImagePolygon,
   createPolygonMask,
+  fillRegionSolid,
   fitResultToOriginal,
   postProcessGeneratedImage,
 } from '../utils/imageUtils';
@@ -36,6 +37,24 @@ export const useGenerate = (placement: ImagePlacement | null) => {
       setError('no_selection');
       return;
     }
+
+    // Solid fill runs entirely in the browser (no OpenAI call, no key needed).
+    if (outputMode === 'solid_fill') {
+      setLoadingState('processing');
+      setError(null);
+      try {
+        const usePolygon = selectionMode === 'polygon' && polygonClosed && polygon && polygon.length >= 3;
+        const filled = await fillRegionSolid(uploadedImageDataUrl, selection, usePolygon ? polygon : null, placement);
+        setGenerateResult({ resultImageBase64: filled, originalCropBase64: uploadedImageDataUrl });
+        setLoadingState('complete');
+        window.setTimeout(() => setLoadingState('idle'), 1500);
+      } catch (error) {
+        setError('api_error', error instanceof Error ? error.message : '');
+        setLoadingState('idle');
+      }
+      return;
+    }
+
     if (!apiKey) {
       setError('no_api_key');
       return;
