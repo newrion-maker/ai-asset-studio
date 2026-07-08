@@ -44,7 +44,7 @@ interface GenerateAssetResult {
 
 const basePrompts: Record<OutputMode, string> = {
   transparent:
-    'Keep only the primary object. Remove every background. Generate a transparent PNG. Preserve original proportions. High quality. No text. Soft edges.',
+    'Keep every foreground subject and object in the image exactly as it is — do not delete, omit, merge, or shrink any of them, including small props. Remove only the background so it becomes fully transparent. Preserve original proportions, colors, and details. Generate a transparent PNG with clean soft edges. No text.',
   keep_background:
     'Keep the original composition. Preserve background. Preserve lighting. Preserve atmosphere. High quality. No text.',
   smart_auto:
